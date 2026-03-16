@@ -4,6 +4,7 @@ metadata:
   id: oci-worker
 
 spec:
+  installImage: ghcr.io/syscode-labs/talos-images/installer:v1.9.0
   matchLabels:
     # Applied manually in Omni UI after OCI nodes connect via SideroLink.
     # omnictl machine set-labels <machine-id> role=oci-worker

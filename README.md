@@ -11,7 +11,7 @@ On first boot, the App-of-Apps in `bootstrap/argocd-app-of-apps.yaml` is applied
 
 ## Structure
 
-```
+```text
 bootstrap/              App-of-Apps + manually bootstrapped apps (Argo CD, Tailscale operator)
 infrastructure/         Helm charts + values, one directory per app
 clusters/oci/           Cluster-specific kustomize patches

@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  yamllint:
+    name: YAML lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install yamllint --quiet
+      - run: yamllint -c .yamllint.yml .
+
+  secrets:
+    name: Secrets detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        run: |
+          GITLEAKS_VERSION=$(curl -sf https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
+            | grep '"tag_name"' | cut -d'"' -f4)
+          curl -sfL "https://github.com/gitleaks/gitleaks/releases/download/${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION#v}_linux_x64.tar.gz" \
+            | tar -xz -C /usr/local/bin gitleaks
+      - name: Detect secrets
+        run: gitleaks detect --source . --redact
+
+  kubeconform:
+    name: Kubernetes manifest validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubeconform
+        run: |
+          curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
+            | tar -xz -C /usr/local/bin kubeconform
+
+      - name: Validate Kubernetes manifests
+        run: |
+          find bootstrap infrastructure clusters \( -name '*.yaml' -o -name '*.yml' \) \
+              ! -name 'values.yaml' ! -name 'values.yml' 2>/dev/null \
+            | xargs kubeconform \
+                -strict \
+                -ignore-missing-schemas \
+                -summary
+
+  helm-lint:
+    name: Helm lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: "3.17.0"
+
+      - name: Add chart repositories
+        run: |
+          helm repo add cilium https://helm.cilium.io
+          helm repo add jetstack https://charts.jetstack.io
+          helm repo add argo https://argoproj.github.io/argo-helm
+          helm repo update
+
+      - name: Lint Cilium chart
+        run: |
+          CHART_VERSION=$(python3 -c "
+          import yaml
+          doc = yaml.safe_load(open('infrastructure/cilium/application.yaml'))
+          srcs = doc['spec']['sources']
+          print(next(s['targetRevision'] for s in srcs if 'chart' in s))
+          ")
+          helm pull cilium/cilium --version "$CHART_VERSION" --untar --untardir /tmp/charts
+          helm lint /tmp/charts/cilium --values infrastructure/cilium/values.yaml
+
+      - name: Lint cert-manager chart
+        run: |
+          CHART_VERSION=$(python3 -c "
+          import yaml
+          doc = yaml.safe_load(open('infrastructure/cert-manager/application.yaml'))
+          srcs = doc['spec']['sources']
+          print(next(s['targetRevision'] for s in srcs if 'chart' in s))
+          ")
+          helm pull jetstack/cert-manager --version "$CHART_VERSION" --untar --untardir /tmp/charts
+          helm lint /tmp/charts/cert-manager --values infrastructure/cert-manager/values.yaml
+
+  pluto:
+    name: API deprecation check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read target Kubernetes version
+        id: k8s
+        run: |
+          K8S_VERSION=$(grep '^kubernetes_version:' omni/talos-image.yaml | awk '{print $2}')
+          echo "version=${K8S_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Checking against Kubernetes ${K8S_VERSION}"
+
+      - name: Install pluto
+        run: |
+          PLUTO_VERSION=$(curl -sf https://api.github.com/repos/FairwindsOps/pluto/releases/latest \
+            | grep '"tag_name"' | cut -d'"' -f4)
+          if [[ -z "$PLUTO_VERSION" ]]; then
+            echo "ERROR: failed to resolve pluto version" >&2
+            exit 1
+          fi
+          curl -sfL "https://github.com/FairwindsOps/pluto/releases/download/${PLUTO_VERSION}/pluto_${PLUTO_VERSION#v}_linux_amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin pluto
+
+      - name: Check for deprecated APIs
+        run: |
+          pluto detect-files \
+            --directory . \
+            --target-versions "k8s=${{ steps.k8s.outputs.version }}" \
+            --ignore-deprecations \
+            --output wide
+
+  markdownlint:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install -g markdownlint-cli2
+      - run: markdownlint-cli2 "**/*.md" "#node_modules"
