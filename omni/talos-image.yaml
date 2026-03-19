@@ -1,6 +1,6 @@
 # Auto-updated by talos-images workflow — do not edit manually
-talos_version: v1.12.5
-kubernetes_version: v1.32.3
-schematic_id: ""
-oci_image_ocid: ""
-updated_at: "2026-03-16T21:19:36Z"
+talos_version: v1.12.6
+kubernetes_version: v1.35.2
+schematic_id: 4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b
+oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaapwpetlngenkj4j5hu6g4ddkppcgobk4t4pwj5hgdzmwwardgik7a
+updated_at: 2026-03-19T23:42:51Z
