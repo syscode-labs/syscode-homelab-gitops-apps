@@ -2,5 +2,5 @@
 talos_version: v1.13.2
 kubernetes_version: v1.36.0
 schematic_id: 4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b
-oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaatw2j6w3d7wrce5va7p4kfdwpyo2b76yksw3npkhdqhzwklbtoh2a
-updated_at: 2026-05-17T05:49:43Z
+oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaa5qagisnxl5q2iidgnz2o4xhbwi27a27cdhk5uwn5obnnsgklyxfa
+updated_at: 2026-05-24T05:59:27Z
