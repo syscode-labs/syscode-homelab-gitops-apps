@@ -1,8 +1,8 @@
 # Auto-updated by talos-images workflow - do not edit manually
 talos_version: v1.13.5
 kubernetes_version: v1.36.2
-platform: oracle
-image_artifact: oracle-arm64.qcow2
+platform: metal
+image_artifact: metal-arm64.qcow2
 schematic_id: 4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b
-oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaa5rw4x7tawzavq72huxnmulhruqnsraq3bygkonu23ykurhkvskia
-updated_at: 2026-07-13T00:50:18Z
+oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaagkqxddl3oceoqjrej2rznawmq5pu7nt26wt6pkbrxcesxyvy7yoq
+updated_at: 2026-07-13T00:56:28Z
