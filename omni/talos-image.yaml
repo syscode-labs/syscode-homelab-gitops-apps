@@ -1,6 +1,7 @@
 # Auto-updated by talos-images workflow — do not edit manually
-talos_version: v1.13.5
+talos_version: v1.13.6
 kubernetes_version: v1.36.2
-schematic_id: 4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b
-oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaadheaqve6ikpx5nqn637zmaudgq6dt67tnv7z2t7dnju5tyu6l2ta
-updated_at: 2026-07-05T05:59:40Z
+schematic_id: 376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+early_tailscale_image: ghcr.io/syscode-labs/talos-images/tailscale-early:v1.13.6
+oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaainhjkquyd5le6eo4n3thk6axjcmn6leqnga5i7g2qvxn2p5mslpq
+updated_at: 2026-07-13T19:37:00Z
