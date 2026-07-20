@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: unraid-lab-apps
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  # Cluster-scoped app-of-apps. The unraid-lab cluster's inline root Application
+  # syncs THIS in addition to bootstrap/ (shared infra). OCI does NOT sync this
+  # path, so unraid-lab-only apps (Harbor) never land on OCI.
+  project: default
+  source:
+    repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+    targetRevision: HEAD
+    path: clusters/unraid-lab/apps
+    directory:
+      recurse: true
+      include: "*/application.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

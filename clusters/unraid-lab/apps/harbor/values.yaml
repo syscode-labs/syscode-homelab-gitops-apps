@@ -1,0 +1,52 @@
+# Harbor Helm values — unraid-lab. Backing registry for the Image Factory.
+# See syscode-ai-internal-plans/projects/image-factory-registry.
+#
+# TLS/exposure decision: served on the tailnet via the Tailscale Kubernetes
+# operator Ingress; Tailscale provisions the (Let's Encrypt) cert, so no private
+# CA and no TrustedRootsConfig on nodes. externalURL is the MagicDNS name, stable
+# across an Unraid→OCI move.
+
+externalURL: https://harbor.<tailnet>.ts.net    # set to the real ts.net MagicDNS name
+
+expose:
+  type: ingress
+  tls:
+    enabled: true
+    certSource: none                            # Tailscale terminates TLS at the ingress
+  ingress:
+    hosts:
+      core: harbor.<tailnet>.ts.net
+    className: tailscale                         # Tailscale operator IngressClass
+    # annotations: {}                            # verify: Tailscale operator hostname annotations if needed
+
+# Admin password comes from a pre-created Secret, not committed here.
+existingSecretAdminPassword: harbor-admin-password        # key: HARBOR_ADMIN_PASSWORD
+existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
+
+# Chart-internal Postgres + Redis to start (single-node). NOTE: this is the
+# migration-time data liability flagged in the plan — revisit external DB before
+# an Unraid→OCI move.
+database:
+  type: internal
+redis:
+  type: internal
+
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    registry:
+      size: 100Gi          # installer/schematic/cache blobs; size for real churn
+    database:
+      size: 8Gi
+    redis:
+      size: 2Gi
+    jobservice:
+      jobLog:
+        size: 2Gi
+
+# Human auth = PocketID OIDC; robots for machines. OIDC is configured POST-deploy
+# (Harbor API / UI), not via chart values — see the bootstrap script in README.
+
+# Trim to the components actually needed (no Trivy/Notary to start; add later).
+trivy:
+  enabled: false

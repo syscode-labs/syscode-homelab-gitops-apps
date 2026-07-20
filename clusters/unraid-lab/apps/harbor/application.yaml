@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: harbor
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  sources:
+    - repoURL: https://helm.goharbor.io
+      chart: harbor
+      targetRevision: "1.15.1"          # verify against a current Harbor 2.12.x chart
+      helm:
+        valueFiles:
+          - $values/clusters/unraid-lab/apps/harbor/values.yaml
+    - repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc     # the unraid-lab cluster's own Argo CD
+    namespace: harbor
+  syncPolicy:
+    automated:
+      prune: false                       # registry data is precious; no auto-prune
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
