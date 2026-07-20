@@ -5,10 +5,13 @@ repos:
       - id: yamllint
         args: [-c, .yamllint.yml]
 
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.21.2
+  - repo: local
     hooks:
       - id: gitleaks
+        name: gitleaks
+        entry: gitleaks protect --staged --redact --verbose
+        language: system
+        pass_filenames: false
 
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
