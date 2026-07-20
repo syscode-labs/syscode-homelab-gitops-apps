@@ -1,0 +1,74 @@
+# Talos inline manifests for the unraid-lab cluster bootstrap.
+#
+# Talos applies these on the first control-plane node before any scheduler is up.
+# They install Argo CD; two seeded root Applications then fetch everything else
+# from this repo (the "install Argo, then pull the rest remotely" pattern):
+#
+#   root             -> bootstrap/                 shared infra (app-of-apps -> infrastructure/*)
+#   unraid-lab-apps  -> clusters/unraid-lab/apps/  unraid-lab-only (Harbor, ARC runners)
+#
+# The OCI cluster uses ONE root (bootstrap/ only). unraid-lab needs BOTH, so its
+# cluster-scoped apps under clusters/unraid-lab/ get seeded too — OCI never syncs
+# that path, so those apps stay unraid-lab-only.
+#
+# Argo CD (and Cilium, IF this cluster is CNI-none like OCI — see the CNI decision
+# in omni-on-unraid) are generated the same way OCI does it:
+#   the argocd block below is replaced by argo-cd <version> manifests/install.yaml.
+
+cluster:
+  inlineManifests:
+    - name: argocd
+      contents: |
+        # !!! PLACEHOLDER — replace with the raw Argo CD install manifest !!!
+        # Source: curl -sL https://raw.githubusercontent.com/argoproj/argo-cd/<ARGOCD_VERSION>/manifests/install.yaml
+        # Namespace: argocd (create it in this manifest, as OCI's generated block does)
+
+    - name: argocd-root
+      contents: |
+        # Shared infra — identical to what OCI runs.
+        apiVersion: argoproj.io/v1alpha1
+        kind: Application
+        metadata:
+          name: root
+          namespace: argocd
+        spec:
+          project: default
+          source:
+            repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
+            targetRevision: HEAD
+            path: bootstrap
+          destination:
+            server: https://kubernetes.default.svc
+            namespace: argocd
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+
+    - name: argocd-unraid-lab-apps
+      contents: |
+        # unraid-lab-only apps (Harbor, ARC runners). Fans out to
+        # clusters/unraid-lab/apps/*/application.yaml.
+        apiVersion: argoproj.io/v1alpha1
+        kind: Application
+        metadata:
+          name: unraid-lab-apps
+          namespace: argocd
+        spec:
+          project: default
+          source:
+            repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
+            targetRevision: HEAD
+            path: clusters/unraid-lab/apps
+            directory:
+              recurse: true
+              include: "*/application.yaml"
+          destination:
+            server: https://kubernetes.default.svc
+            namespace: argocd
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+            syncOptions:
+              - CreateNamespace=true
