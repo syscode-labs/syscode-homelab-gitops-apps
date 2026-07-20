@@ -5,8 +5,12 @@ Apps scoped to the Omni-managed **`unraid-lab`** Talos cluster. The repo's share
 clusters); it does **not** sync `clusters/`. So apps placed here run on
 `unraid-lab` only and never land on OCI.
 
-First app: **Harbor** — backing registry for the Image Factory
-(`syscode-ai-internal-plans/projects/image-factory-registry`).
+First apps:
+
+- **Harbor** — backing registry for the Image Factory
+  (`syscode-ai-internal-plans/projects/image-factory-registry`).
+- **ARC runner scale sets** — self-hosted GitHub Actions runners for the
+  Harbor↔GHCR mirror and later homelab jobs.
 
 ## Wiring (how these apps get synced)
 
@@ -30,6 +34,10 @@ cluster template — see `omni-on-unraid` / the Omni machine config) must sync
   (`externalURL` + `expose.ingress.hosts.core` → `harbor.<tailnet>.ts.net`).
 - [ ] Create the `harbor-admin-password` Secret (`HARBOR_ADMIN_PASSWORD`) in the
   `harbor` namespace before first sync.
+- [ ] Create the `arc-gha-secret` GitHub App Secret in the `arc-runners`
+  namespace before syncing `arc-runners`.
+- [ ] Create the `harbor-mirror-robot` Secret in the `arc-runners` namespace
+  with `username` and `password` keys before runner pods start.
 
 ## Harbor bootstrap (post-deploy, plan decision (b): idempotent API script)
 

@@ -1,0 +1,49 @@
+githubConfigUrl: https://github.com/syscode-labs
+githubConfigSecret: arc-gha-secret
+
+runnerGroup: default
+runnerScaleSetName: arc-runners-container
+minRunners: 0
+maxRunners: 3
+
+scaleSetLabels:
+  - self-hosted
+  - linux
+  - x64
+  - unraid-lab
+  - arc-runners-container
+  - harbor-mirror
+
+controllerServiceAccount:
+  namespace: arc-systems
+  name: arc-gha-runner-scale-set-controller
+
+template:
+  metadata:
+    labels:
+      syscode.dev/cluster: unraid-lab
+      syscode.dev/runner-purpose: harbor-mirror
+  spec:
+    containers:
+      - name: runner
+        image: ghcr.io/actions/actions-runner:2.334.0
+        command:
+          - /home/runner/run.sh
+        env:
+          - name: HARBOR_ROBOT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: harbor-mirror-robot
+                key: username
+          - name: HARBOR_ROBOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: harbor-mirror-robot
+                key: password
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: "2"
+            memory: 4Gi

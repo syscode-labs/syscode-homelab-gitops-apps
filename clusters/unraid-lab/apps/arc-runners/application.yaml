@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: arc-runner-scale-sets
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - list:
+        elements:
+          - cluster: unraid-lab
+            server: https://kubernetes.default.svc
+            namespace: arc-runners
+            scaleSetName: arc-runners-container
+            valuesPath: clusters/unraid-lab/apps/arc-runners/values.yaml
+          # Add OCI here once the OCI cluster is registered in this Argo CD:
+          # - cluster: oci-lab
+          #   server: https://kubernetes.default.svc
+          #   namespace: arc-runners
+          #   scaleSetName: arc-runners-oci
+          #   valuesPath: clusters/oci/apps/arc-runners/values.yaml
+  template:
+    metadata:
+      name: "{{ .cluster }}-{{ .scaleSetName }}"
+      namespace: argocd
+      labels:
+        syscode.dev/cluster: "{{ .cluster }}"
+        syscode.dev/app: arc-runners
+    spec:
+      project: default
+      sources:
+        - repoURL: ghcr.io/actions/actions-runner-controller-charts
+          chart: gha-runner-scale-set
+          targetRevision: "0.14.2"
+          helm:
+            releaseName: "{{ .scaleSetName }}"
+            valueFiles:
+              - "$values/{{ .valuesPath }}"
+        - repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+          targetRevision: HEAD
+          ref: values
+      destination:
+        server: "{{ .server }}"
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
