@@ -14,7 +14,7 @@ spec:
       helm:
         valueFiles:
           - $values/infrastructure/cert-manager/values.yaml
-    - repoURL: https://github.com/syscode-labs/oci-talos-gitops-apps.git
+    - repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
       targetRevision: HEAD
       ref: values
   destination:

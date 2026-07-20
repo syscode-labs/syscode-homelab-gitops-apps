@@ -6,6 +6,7 @@ metadata:
 spec:
   installImage: ghcr.io/syscode-labs/talos-images/installer:v1.13.6
   matchLabels:
-    # Applied manually in Omni UI after OCI nodes connect via SideroLink.
+    # Synced into Omni; UI can select this class after machines join.
+    # Labels may be assigned by automation or, for lab recovery, in Omni UI.
     # omnictl machine set-labels <machine-id> role=oci-worker
     role: oci-worker

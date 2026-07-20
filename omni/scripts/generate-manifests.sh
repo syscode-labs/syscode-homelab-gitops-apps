@@ -45,7 +45,7 @@ cat > "${PATCH_FILE}" <<EOF
 #   mise run oci:generate-manifests
 #
 # Cilium: ${CILIUM_VERSION} — kubeProxyReplacement=true, KubePrism (localhost:7445)
-# Argo CD: ${ARGOCD_VERSION} — raw install manifest + root App-of-Apps
+# Argo CD: ${ARGOCD_VERSION} — raw install manifest + inline root Application
 
 cluster:
   inlineManifests:
@@ -61,6 +61,7 @@ ${ARGOCD_CONTENT}
 
     - name: argocd-app-of-apps
       contents: |
+        # Inline root Application. It syncs bootstrap/, which then fans out to infrastructure/.
         apiVersion: argoproj.io/v1alpha1
         kind: Application
         metadata:
@@ -69,7 +70,7 @@ ${ARGOCD_CONTENT}
         spec:
           project: default
           source:
-            repoURL: https://github.com/syscode-labs/oci-talos-gitops-apps
+            repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
             targetRevision: HEAD
             path: bootstrap
           destination:

@@ -9,8 +9,9 @@
 #   - k8sServiceHost=localhost, k8sServicePort=7445 (KubePrism — node-local API proxy)
 #   - ipam.mode=kubernetes
 #
-# Argo CD is the raw upstream install manifest + a root App-of-Apps pointing at the
-# apps repo (syscode-labs/oci-talos-gitops-apps). Argo CD picks up all apps from there.
+# Argo CD is the raw upstream install manifest + an inline root Application.
+# The root Application syncs bootstrap/; bootstrap/argocd-app-of-apps.yaml fans
+# out to infrastructure/*/application.yaml. Argo CD does not sync omni/.
 
 cluster:
   inlineManifests:
@@ -42,7 +43,7 @@ cluster:
 
     - name: argocd-app-of-apps
       contents: |
-        # Root App-of-Apps — Argo CD manages itself and all cluster apps from here.
+        # Inline root Application. It syncs bootstrap/, which then fans out to infrastructure/.
         # Update REPO_URL and TARGET_REVISION to match your apps repo.
         apiVersion: argoproj.io/v1alpha1
         kind: Application
@@ -52,7 +53,7 @@ cluster:
         spec:
           project: default
           source:
-            repoURL: https://github.com/syscode-labs/oci-talos-gitops-apps
+            repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
             targetRevision: HEAD
             path: bootstrap
           destination:
