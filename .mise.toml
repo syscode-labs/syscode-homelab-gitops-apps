@@ -1,0 +1,11 @@
+[tools]
+helm = "3.17.0"
+yq = "4"
+
+[tasks."oci:generate-manifests"]
+description = "Regenerate OCI (oci-talos) Talos inline-manifests: argocd + cilium + appset"
+run = "omni/scripts/generate-manifests.sh oci-talos"
+
+[tasks."unraid:generate-manifests"]
+description = "Regenerate unraid-lab Talos inline-manifests: argocd + appset"
+run = "omni/scripts/generate-manifests.sh unraid-lab"
