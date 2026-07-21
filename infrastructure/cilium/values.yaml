@@ -17,8 +17,10 @@ cgroup:
 ipam:
   mode: kubernetes
 
-# Tunnel mode (compatible with OCI VCN networking)
-tunnel: vxlan
+# Tunnel routing (compatible with OCI VCN networking).
+# `tunnel: vxlan` was removed in Cilium 1.15 — split into routingMode + tunnelProtocol.
+routingMode: tunnel
+tunnelProtocol: vxlan
 
 # Security contexts required by Talos
 securityContext:
