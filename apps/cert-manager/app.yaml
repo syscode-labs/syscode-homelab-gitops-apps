@@ -1,0 +1,6 @@
+# App coords consumed by the layering ApplicationSet. Values layer:
+# values/base/cert-manager.yaml -> types/<type>/ -> clusters/<name>/ (deep-merge, later wins).
+chart: cert-manager
+repoURL: https://charts.jetstack.io
+version: "v1.17.1"
+namespace: cert-manager

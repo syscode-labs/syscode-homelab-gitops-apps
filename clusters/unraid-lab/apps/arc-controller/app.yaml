@@ -1,0 +1,5 @@
+# OCI Helm chart (repoURL is an OCI registry).
+chart: gha-runner-scale-set-controller
+repoURL: ghcr.io/actions/actions-runner-controller-charts
+version: "0.14.2"
+namespace: arc-systems

@@ -1,0 +1,85 @@
+# Layering ApplicationSet — the "chart-app" engine.
+#
+# SEEDED PER CLUSTER by the Talos inline manifests. The two `list` elements below
+# (clusterName / clusterType) are the ONLY per-cluster difference — each cluster's
+# inline manifest embeds this file with its own identity. This copy is the
+# canonical reference; the identities here are placeholders.
+#
+# Selection (which apps run): three git generators —
+#   apps/*/app.yaml                        shared (every cluster)
+#   types/<clusterType>/apps/*/app.yaml    per cluster-TYPE
+#   clusters/<clusterName>/apps/*/app.yaml per CLUSTER
+# Values (override anything the chart exposes): deep-merge valueFiles —
+#   values/base/<app>.yaml -> values/types/<type>/<app>.yaml -> values/clusters/<name>/<app>.yaml
+# Custom ApplicationSets (e.g. arc-runners) are NOT chart-apps and run on the raw
+# directory-sync lane (clusters/<name>/apps/*/application.yaml), not here.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - matrix:                                   # shared apps
+        generators:
+          - list:
+              elements:
+                - clusterName: CLUSTER_NAME
+                  clusterType: CLUSTER_TYPE
+          - git:
+              repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
+              revision: HEAD
+              files:
+                - path: apps/*/app.yaml
+    - matrix:                                   # per cluster-TYPE apps
+        generators:
+          - list:
+              elements:
+                - clusterName: CLUSTER_NAME
+                  clusterType: CLUSTER_TYPE
+          - git:
+              repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
+              revision: HEAD
+              files:
+                - path: types/{{.clusterType}}/apps/*/app.yaml
+    - matrix:                                   # per CLUSTER apps
+        generators:
+          - list:
+              elements:
+                - clusterName: CLUSTER_NAME
+                  clusterType: CLUSTER_TYPE
+          - git:
+              repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
+              revision: HEAD
+              files:
+                - path: clusters/{{.clusterName}}/apps/*/app.yaml
+  template:
+    metadata:
+      name: "{{.path.basename}}"                # app name = its directory name
+    spec:
+      project: default
+      sources:
+        - repoURL: "{{.repoURL}}"
+          chart: "{{.chart}}"
+          targetRevision: "{{.version}}"
+          helm:
+            ignoreMissingValueFiles: true       # type/cluster value files are optional
+            valueFiles:
+              - $v/values/base/{{.path.basename}}.yaml
+              - $v/values/types/{{.clusterType}}/{{.path.basename}}.yaml
+              - $v/values/clusters/{{.clusterName}}/{{.path.basename}}.yaml
+        - repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
+          targetRevision: HEAD
+          ref: v
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{.namespace}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
