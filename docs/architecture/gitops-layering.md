@@ -9,11 +9,13 @@ Talos `inlineManifests` (per cluster) install Argo CD, then seed **three roots**
 The only per-cluster difference is the cluster's identity (`clusterName`,
 `clusterType`), baked into the seeded `appset`.
 
-| Root | Kind | Syncs | Purpose |
-|------|------|-------|---------|
-| `apps` | ApplicationSet | `apps/*`, `types/<type>/apps/*`, `clusters/<name>/apps/*` | **chart-apps**, values layered |
-| `bootstrap` | Application | `bootstrap/` | shared raw manifests (tailscale operator) |
-| `<cluster>-raw` | Application | `clusters/<name>/apps/*/application.yaml` | **custom ApplicationSets** (arc-runners) |
+- **`apps`** (ApplicationSet) — syncs `apps/*`, `types/<type>/apps/*`,
+  `clusters/<name>/apps/*`. The **chart-apps**, values layered.
+- **`bootstrap`** (Application) — syncs `bootstrap/`. Shared raw manifests
+  (tailscale operator).
+- **`<cluster>-raw`** (Application) — syncs
+  `clusters/<name>/apps/*/application.yaml`. **Custom ApplicationSets** that
+  aren't chart-apps (arc-runners).
 
 Chart-app lane keys on **`app.yaml`**; raw lane keys on **`application.yaml`** —
 so the two never double-manage an app in the same directory.
