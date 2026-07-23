@@ -10,7 +10,7 @@
 # Usage:  omni/scripts/generate-manifests.sh <oci-talos|unraid-lab>
 #   or:   mise run oci:generate-manifests   /   mise run unraid:generate-manifests
 #
-# Requirements: yq (mikefarah v4), curl, helm. Run after Cilium/Argo CD version
+# Requirements: yq (mikefarah v4), curl, helm, kubectl. Run after Cilium/Argo CD version
 # bumps or appset.yaml changes, then review + commit the result.
 set -euo pipefail
 
@@ -52,10 +52,23 @@ inject() {
   ' "$FILE"
 }
 
-echo "==> Argo CD ${ARGOCD_VERSION} install manifest..."
+echo "==> Argo CD ${ARGOCD_VERSION} install manifest (namespaced to argocd)..."
+# Upstream install.yaml carries NO namespace on its resources — it relies on
+# `kubectl apply -n argocd`. Talos applies inline manifests verbatim with no
+# namespace default, so the namespaced resources would miss the argocd namespace
+# and never install. Stamp it with kustomize (also fixes the RBAC binding
+# subjects), and prepend the Namespace since kustomize won't create it.
+mkdir -p "$TMP/argocd"
 curl -sfL "https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml" \
-  -o "$TMP/argocd.yaml"
-inject argocd "$TMP/argocd.yaml"
+  -o "$TMP/argocd/install.yaml"
+cat > "$TMP/argocd/kustomization.yaml" <<'KUST'
+namespace: argocd
+resources:
+  - install.yaml
+KUST
+{ printf 'apiVersion: v1\nkind: Namespace\nmetadata:\n  name: argocd\n---\n'; \
+  kubectl kustomize "$TMP/argocd"; } > "$TMP/argocd-manifest.yaml"
+inject argocd "$TMP/argocd-manifest.yaml"
 
 echo "==> appset.yaml for ${CLUSTER} / ${CLUSTER_TYPE}..."
 sed -e "s/CLUSTER_NAME/${CLUSTER}/g" -e "s/CLUSTER_TYPE/${CLUSTER_TYPE}/g" \

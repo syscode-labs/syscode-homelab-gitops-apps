@@ -1,6 +1,7 @@
 [tools]
 helm = "3.17.0"
 yq = "4"
+kubectl = "1.34"
 
 [tasks."oci:generate-manifests"]
 description = "Regenerate OCI (oci-talos) Talos inline-manifests: argocd + cilium + appset"
