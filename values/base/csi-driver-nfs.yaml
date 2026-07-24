@@ -12,7 +12,6 @@ storageClass:
   parameters:
     server: 10.10.210.59
     share: /mnt/user/unraid-talos-pv-store
-    mountPermissions: "0777"     # non-root pods (PSA restricted) must write the subdir
   reclaimPolicy: Retain          # registry data — keep backing dir on PVC delete
   volumeBindingMode: Immediate
   mountOptions:
