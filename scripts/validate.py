@@ -107,8 +107,25 @@ def main() -> int:
         if docs is None:
             ok = False
             continue
+
+        # chart-app coord file (apps/*/app.yaml) consumed by appset.yaml. No kind;
+        # render it the way the ApplicationSet would — chart + base values.
+        # ponytail: base layer only; values/types|clusters overlays are per-cluster
+        # (empty for now) and validated at sync time, not repo-wide here.
+        if os.path.basename(path) == "app.yaml" and docs and "chart" in docs[0]:
+            coord = docs[0]
+            app = os.path.basename(os.path.dirname(path))
+            base_values = f"values/base/{app}.yaml"
+            value_files = [base_values] if os.path.exists(base_values) else []
+            print(f"── render chart-app {app}  ({path})")
+            if not render_and_check(
+                app, coord["repoURL"], coord["chart"], str(coord.get("version", "")), value_files
+            ):
+                ok = False
+            continue
+
         if not any("kind" in d for d in docs):
-            continue  # values / Talos patch / coord file — not a k8s manifest
+            continue  # values / Talos patch — not a k8s manifest
 
         for doc in docs:
             if doc.get("kind") == "Application":

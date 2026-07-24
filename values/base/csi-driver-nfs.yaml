@@ -1,0 +1,18 @@
+# csi-driver-nfs — default StorageClass for homelab-kvm (unraid-lab).
+# PVs live on the unraid NFS export /mnt/user/unraid-talos-pv-store (parity-protected
+# array). server is the unraid LAN IP — nfsd does not listen on the libvirt virbr0
+# side, and the NAT'd nodes reach it there. The export uses no_root_squash so the
+# provisioner can create and own per-PV subdirectories. Default class so Harbor's
+# PVCs bind with no per-app change.
+storageClass:
+  create: true
+  name: nfs
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+  parameters:
+    server: 10.10.210.59
+    share: /mnt/user/unraid-talos-pv-store
+  reclaimPolicy: Retain          # registry data — keep backing dir on PVC delete
+  volumeBindingMode: Immediate
+  mountOptions:
+    - nfsvers=4.1
