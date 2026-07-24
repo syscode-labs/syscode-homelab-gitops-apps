@@ -1,0 +1,9 @@
+# App coords consumed by the layering ApplicationSet. Storage for homelab-kvm
+# (unraid-lab): PVs backed by an unraid NFS export (data on the parity-protected
+# array — unraid IS the data-layer replication). Cloud clusters use their provider
+# CSI instead (per-type storage). NFS client is in-kernel, so unlike Longhorn this
+# needs NO Talos image extension.
+chart: csi-driver-nfs
+repoURL: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+version: "4.13.4"
+namespace: kube-system

@@ -41,14 +41,24 @@ cluster:
         #
         # !!! PLACEHOLDER — run mise run oci:generate-manifests to populate !!!
 
-    - name: argocd-app-of-apps
+    - name: argocd-apps
       contents: |
-        # Inline root Application. It syncs bootstrap/, which then fans out to infrastructure/.
-        # Update REPO_URL and TARGET_REVISION to match your apps repo.
+        # Chart-app lane — the layering ApplicationSet. The generate step injects
+        # the repo-root appset.yaml with THIS cluster's identity:
+        #   clusterName: oci-talos, clusterType: cloud
+        # It deploys apps/* (shared) + types/cloud/apps/* + clusters/oci-talos/apps/*
+        # with values layered base -> type -> cluster.
+        #
+        # !!! run: mise run oci:generate-manifests — injects appset.yaml here !!!
+
+    - name: argocd-bootstrap
+      contents: |
+        # Raw-manifest lane: syncs bootstrap/ (shared non-chart manifests, e.g.
+        # the Tailscale operator).
         apiVersion: argoproj.io/v1alpha1
         kind: Application
         metadata:
-          name: root
+          name: bootstrap
           namespace: argocd
         spec:
           project: default

@@ -1,35 +1,42 @@
 # Talos inline manifests for the unraid-lab cluster bootstrap.
 #
 # Talos applies these on the first control-plane node before any scheduler is up.
-# They install Argo CD; two seeded root Applications then fetch everything else
-# from this repo (the "install Argo, then pull the rest remotely" pattern):
+# They install Argo CD; three seeded roots then pull everything else from this
+# repo ("install Argo, then fetch the rest remotely"):
 #
-#   root             -> bootstrap/                 shared infra (app-of-apps -> infrastructure/*)
-#   unraid-lab-apps  -> clusters/unraid-lab/apps/  unraid-lab-only (Harbor, ARC runners)
+#   apps       (ApplicationSet)  -> apps/* + types/homelab-kvm/apps/* + clusters/unraid-lab/apps/*
+#                                   chart-apps, values layered base -> type -> cluster
+#   bootstrap  (Application)     -> bootstrap/                shared raw manifests (tailscale operator)
+#   unraid-raw (Application)     -> clusters/unraid-lab/apps/*/application.yaml
+#                                   custom ApplicationSets that aren't chart-apps (arc-runners)
 #
-# The OCI cluster uses ONE root (bootstrap/ only). unraid-lab needs BOTH, so its
-# cluster-scoped apps under clusters/unraid-lab/ get seeded too — OCI never syncs
-# that path, so those apps stay unraid-lab-only.
+# The chart-app lane keys on app.yaml; the raw lane keys on application.yaml — so
+# arc-runners (an ApplicationSet, application.yaml) and harbor/arc-controller
+# (chart-apps, app.yaml) never double-manage.
 #
-# Argo CD (and Cilium, IF this cluster is CNI-none like OCI — see the CNI decision
-# in omni-on-unraid) are generated the same way OCI does it:
-#   the argocd block below is replaced by argo-cd <version> manifests/install.yaml.
+# Argo CD (and Cilium, IF unraid-lab is CNI-none like OCI — the CNI decision lives
+# in omni-on-unraid) are filled by the generate step, same pattern as OCI.
 
 cluster:
   inlineManifests:
     - name: argocd
       contents: |
-        # !!! PLACEHOLDER — replace with the raw Argo CD install manifest !!!
+        # !!! PLACEHOLDER — raw Argo CD install manifest (namespace argocd) !!!
         # Source: curl -sL https://raw.githubusercontent.com/argoproj/argo-cd/<ARGOCD_VERSION>/manifests/install.yaml
-        # Namespace: argocd (create it in this manifest, as OCI's generated block does)
 
-    - name: argocd-root
+    - name: argocd-apps
       contents: |
-        # Shared infra — identical to what OCI runs.
+        # Chart-app lane — inject repo-root appset.yaml with THIS cluster's identity:
+        #   clusterName: unraid-lab, clusterType: homelab-kvm
+        #
+        # !!! generate step injects appset.yaml here !!!
+
+    - name: argocd-bootstrap
+      contents: |
         apiVersion: argoproj.io/v1alpha1
         kind: Application
         metadata:
-          name: root
+          name: bootstrap
           namespace: argocd
         spec:
           project: default
@@ -45,14 +52,13 @@ cluster:
               prune: true
               selfHeal: true
 
-    - name: argocd-unraid-lab-apps
+    - name: argocd-unraid-raw
       contents: |
-        # unraid-lab-only apps (Harbor, ARC runners). Fans out to
-        # clusters/unraid-lab/apps/*/application.yaml.
+        # Raw lane for unraid-lab custom ApplicationSets (arc-runners).
         apiVersion: argoproj.io/v1alpha1
         kind: Application
         metadata:
-          name: unraid-lab-apps
+          name: unraid-raw
           namespace: argocd
         spec:
           project: default
