@@ -4,7 +4,7 @@ metadata:
   id: oci-cp
 
 spec:
-  installImage: ghcr.io/syscode-labs/talos-images/installer:v1.13.6
+  installImage: ghcr.io/syscode-labs/talos-images/installer:v1.13.7
   matchLabels:
     # Synced into Omni; UI can select this class after machines join.
     # Labels may be assigned by automation or, for lab recovery, in Omni UI.
