@@ -90,7 +90,7 @@ Longhorn (replication we don't need + the risk we're avoiding).
 ## Risks
 
 | Risk | Impact | Likelihood | Mitigation |
-|------|--------|-----------|------------|
+| ------ | -------- | ----------- | ------------ |
 | Export rule/source-IP wrong → mounts fail | Med | Med | `no_root_squash` + both subnets in rule; verify with a test PVC before Harbor |
 | NFS single-server (unraid) is a SPOF | Med | Low | Accepted — unraid *is* the durability layer by design |
 | Argo not fixed → CSI never deploys | High | High (now) | Fix bootstrap namespacing first (prerequisite above) |
