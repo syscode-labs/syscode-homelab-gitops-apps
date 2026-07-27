@@ -25,18 +25,18 @@ existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
 
 # Argo CD renders this chart repeatedly. Reuse the live internal credentials so
 # Helm does not generate a new Secret value and roll workloads on every compare.
-existingSecretSecretKey: harbor-core
+existingSecretSecretKey: harbor-runtime-core
 
 core:
-  existingSecret: harbor-core
-  existingXsrfSecret: harbor-core
-  secretName: harbor-core
+  existingSecret: harbor-runtime-core
+  existingXsrfSecret: harbor-runtime-core
+  secretName: harbor-runtime-core
 
 jobservice:
-  existingSecret: harbor-jobservice
+  existingSecret: harbor-runtime-jobservice
 
 registry:
-  existingSecret: harbor-registry
+  existingSecret: harbor-runtime-registry
   credentials:
     existingSecret: harbor-registry-credentials
 
