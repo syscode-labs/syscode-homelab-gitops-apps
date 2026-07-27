@@ -1,0 +1,16 @@
+# Cilium creates CiliumIdentity resources at runtime from workload labels.
+# Exclude them globally so Argo CD never mistakes a generated identity for an
+# application resource and attempts to prune it.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+data:
+  resource.exclusions: |
+    - apiGroups:
+        - cilium.io
+      kinds:
+        - CiliumIdentity
+      clusters:
+        - "*"
