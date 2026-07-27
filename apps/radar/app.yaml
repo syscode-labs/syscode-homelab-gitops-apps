@@ -1,0 +1,5 @@
+# App coordinates consumed by the layering ApplicationSet.
+chart: radar
+repoURL: https://skyhook-io.github.io/helm-charts
+version: "1.8.6"
+namespace: radar
