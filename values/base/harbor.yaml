@@ -6,7 +6,7 @@
 # CA and no TrustedRootsConfig on nodes. externalURL is the MagicDNS name, stable
 # across an Unraid→OCI move.
 
-externalURL: https://harbor.<tailnet>.ts.net    # set to the real ts.net MagicDNS name
+externalURL: https://harbor.wind-bearded.ts.net
 
 expose:
   type: ingress
@@ -15,7 +15,7 @@ expose:
     certSource: none                            # Tailscale terminates TLS at the ingress
   ingress:
     hosts:
-      core: harbor.<tailnet>.ts.net
+      core: harbor.wind-bearded.ts.net
     className: tailscale                         # Tailscale operator IngressClass
     # annotations: {}                            # verify: Tailscale operator hostname annotations if needed
 

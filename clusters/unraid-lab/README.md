@@ -30,8 +30,8 @@ cluster template — see `omni-on-unraid` / the Omni machine config) must sync
   TLS.
 - [ ] Point the inline root Application at `clusters/unraid-lab/app-of-apps.yaml`
   (plus `bootstrap/`).
-- [ ] Set the real MagicDNS name in `apps/harbor/values.yaml`
-  (`externalURL` + `expose.ingress.hosts.core` → `harbor.<tailnet>.ts.net`).
+- [x] Set `values/base/harbor.yaml` to the real MagicDNS name
+  (`externalURL` + `expose.ingress.hosts.core` → `harbor.wind-bearded.ts.net`).
 - [ ] Create the `harbor-admin-password` Secret (`HARBOR_ADMIN_PASSWORD`) in the
   `harbor` namespace before first sync.
 - [ ] Create the `arc-gha-secret` GitHub App Secret in the `arc-runners`

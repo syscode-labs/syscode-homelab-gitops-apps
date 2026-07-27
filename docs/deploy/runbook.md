@@ -9,10 +9,11 @@ Clusters:
 - `oci-talos` — type `cloud`, bootstraps its own Cilium (CNI-none Talos).
 - `unraid-lab` — type `homelab-kvm`, no inline Cilium.
 
-## 1. Fill placeholders
+## 1. Confirm the Harbor endpoint
 
-Edit `values/base/harbor.yaml`: replace both `harbor.<tailnet>.ts.net` with the
-cluster's real MagicDNS name. Nothing else in `values/` carries a placeholder.
+`values/base/harbor.yaml` uses `harbor.wind-bearded.ts.net`, the cluster's
+Tailscale MagicDNS name. Update both the `externalURL` and ingress host together
+if the tailnet domain changes.
 
 ## 2. Generate inline-manifests, commit
 
