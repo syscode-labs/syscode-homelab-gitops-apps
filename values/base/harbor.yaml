@@ -23,6 +23,23 @@ expose:
 existingSecretAdminPassword: harbor-admin-password        # key: HARBOR_ADMIN_PASSWORD
 existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
 
+# Argo CD renders this chart repeatedly. Reuse the live internal credentials so
+# Helm does not generate a new Secret value and roll workloads on every compare.
+existingSecretSecretKey: harbor-core
+
+core:
+  existingSecret: harbor-core
+  existingXsrfSecret: harbor-core
+  secretName: harbor-core
+
+jobservice:
+  existingSecret: harbor-jobservice
+
+registry:
+  existingSecret: harbor-registry
+  credentials:
+    existingSecret: harbor-registry-credentials
+
 # Chart-internal Postgres + Redis to start (single-node). NOTE: this is the
 # migration-time data liability flagged in the plan — revisit external DB before
 # an Unraid→OCI move.
