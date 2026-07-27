@@ -14,6 +14,10 @@ spec:
         oauth:
           clientId: ""      # set via Argo CD ApplicationSet or cluster secret
           clientSecret: ""  # set via Argo CD ApplicationSet or cluster secret
+        proxyConfig:
+          # Reuse the tag authorized for the operator; tag:k8s is not allowed
+          # by this tailnet and prevents Ingress proxy provisioning.
+          defaultTags: "tag:k8s-operator"
   destination:
     server: https://kubernetes.default.svc
     namespace: tailscale
