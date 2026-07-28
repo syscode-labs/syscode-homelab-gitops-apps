@@ -6,4 +6,4 @@ ingress:
           pathType: Prefix
   tls:
     - hosts:
-        - radar-unraid-lab
+        - radar-unraid-lab.wind-bearded.ts.net
