@@ -6,4 +6,4 @@ ingress:
           pathType: Prefix
   tls:
     - hosts:
-        - radar-oci-talos
+        - radar-oci-talos.wind-bearded.ts.net
