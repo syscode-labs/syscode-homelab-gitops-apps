@@ -1,0 +1,5 @@
+# Radar is private to the tailnet on every cluster. Cluster overlays set their
+# own MagicDNS service name so Radar endpoints remain independently routable.
+ingress:
+  enabled: true
+  className: tailscale
