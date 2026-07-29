@@ -22,6 +22,10 @@ ipam:
 routingMode: tunnel
 tunnelProtocol: vxlan
 
+# Omni's SideroLink interface is MTU 1280. Keep pod networking sized for the
+# physical 1500-byte NIC and VXLAN encapsulation instead.
+MTU: 1450
+
 # Security contexts required by Talos
 securityContext:
   capabilities:
