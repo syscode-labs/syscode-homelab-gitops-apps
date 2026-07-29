@@ -47,8 +47,14 @@ jobs:
 
       - name: Install kubeconform
         run: |
-          curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
-            | tar -xz -C /usr/local/bin kubeconform
+          version="0.8.0"
+          checksum="9bc2bffbf71f261128533edaf912153948b7ff238f9a531ae6d34466ec287883"
+          archive="$(mktemp)"
+          trap 'rm -f "$archive"' EXIT
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/v${version}/kubeconform-linux-amd64.tar.gz" \
+            -o "$archive"
+          printf '%s  %s\n' "$checksum" "$archive" | sha256sum --check --status
+          tar -xzf "$archive" -C /usr/local/bin kubeconform
 
       - name: Render and schema-check manifests
         run: |
