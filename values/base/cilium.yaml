@@ -49,7 +49,22 @@ securityContext:
 # Hubble observability
 hubble:
   enabled: true
+  metrics:
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - icmp
+      - httpV2
+    enableOpenMetrics: true
   relay:
     enabled: true
+    prometheus:
+      enabled: true
   ui:
     enabled: true
+
+# Alloy discovers the chart's annotated Cilium and Hubble metric endpoints.
+prometheus:
+  enabled: true
