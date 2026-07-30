@@ -2,6 +2,18 @@
 cluster:
   name: unraid-lab
 
+# Alloy node/log collectors require host mounts and NET_RAW, so this namespace
+# must opt into the Pod Security level that permits those scoped capabilities.
+extraObjects:
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: monitoring
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged
+
 destinations:
   grafana-cloud-metrics:
     type: prometheus
