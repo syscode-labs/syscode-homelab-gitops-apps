@@ -68,6 +68,9 @@ clusterEvents:
 podLogsViaLoki:
   enabled: true
   collector: alloy-logs
+annotationAutodiscovery:
+  enabled: true
+  collector: alloy-metrics
 
 collectors:
   alloy-metrics:
