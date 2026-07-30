@@ -1,0 +1,88 @@
+# Grafana Cloud destinations use the Omni-delivered grafana-cloud Secret.
+cluster:
+  name: unraid-lab
+
+destinations:
+  grafana-cloud-metrics:
+    type: prometheus
+    url: https://prometheus-prod-55-prod-gb-south-1.grafana.net/api/prom/push
+    auth:
+      type: basic
+      usernameKey: metrics-username
+      passwordKey: metrics-password
+    secret:
+      create: false
+      name: grafana-cloud
+      namespace: monitoring
+  grafana-cloud-logs:
+    type: loki
+    url: https://logs-prod-035.grafana.net/loki/api/v1/push
+    auth:
+      type: basic
+      usernameKey: logs-username
+      passwordKey: logs-password
+    secret:
+      create: false
+      name: grafana-cloud
+      namespace: monitoring
+  grafana-cloud-otlp:
+    type: otlp
+    url: https://otlp-gateway-prod-gb-south-1.grafana.net/otlp
+    protocol: http
+    auth:
+      type: basic
+      usernameKey: otlp-username
+      passwordKey: otlp-password
+    secret:
+      create: false
+      name: grafana-cloud
+      namespace: monitoring
+    metrics:
+      enabled: true
+    logs:
+      enabled: true
+    traces:
+      enabled: true
+
+clusterMetrics:
+  enabled: true
+  collector: alloy-metrics
+hostMetrics:
+  enabled: true
+  collector: alloy-metrics
+clusterEvents:
+  enabled: true
+  collector: alloy-singleton
+podLogsViaLoki:
+  enabled: true
+  collector: alloy-logs
+
+collectors:
+  alloy-metrics:
+    presets: [clustered, statefulset]
+  alloy-singleton:
+    presets: [singleton]
+  alloy-logs:
+    presets: [filesystem-log-reader, daemonset]
+  alloy-receiver:
+    presets: [deployment]
+
+collectorCommon:
+  alloy:
+    remoteConfig:
+      enabled: true
+      url: https://fleet-management-prod-023.grafana.net
+      auth:
+        type: basic
+        usernameKey: fleet-username
+        passwordKey: fleet-password
+      secret:
+        create: false
+        name: grafana-cloud
+        namespace: monitoring
+
+telemetryServices:
+  kube-state-metrics:
+    deploy: true
+  node-exporter:
+    deploy: true
