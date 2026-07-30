@@ -1,3 +1,5 @@
-# Use the Kubelet's authenticated serving endpoint. Do not disable TLS validation.
+# Talos' Kubelet serving certificates do not include the node InternalIP SANs.
+# Metrics Server still authenticates to the Kubelet; this only skips that TLS SAN check.
 args:
   - --kubelet-preferred-address-types=InternalIP,Hostname
+  - --kubelet-insecure-tls
