@@ -25,6 +25,34 @@ set -a; . "$ENV_FILE"; set +a
 
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 
+random_value() {
+  LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c "$1"
+}
+
+persist_value() {
+  local name="$1" value="$2"
+  printf '\n%s=%q\n' "$name" "$value" >> "$ENV_FILE"
+  printf -v "$name" '%s' "$value"
+  export "$name"
+}
+
+# Harbor values reference these Secrets before Helm can create any workloads.
+# Generate them once and retain them in gitignored bootstrap state.
+for name in HARBOR_RUNTIME_SECRET_KEY HARBOR_CORE_SECRET HARBOR_CORE_XSRF_KEY HARBOR_JOBSERVICE_SECRET HARBOR_REGISTRY_HTTP_SECRET HARBOR_REGISTRY_PASSWORD; do
+  [ -n "${!name:-}" ] || persist_value "$name" "$(random_value 32)"
+done
+
+if [ -z "${HARBOR_REGISTRY_HTPASSWD:-}" ]; then
+  persist_value HARBOR_REGISTRY_HTPASSWD "$(openssl passwd -apr1 -salt "$(random_value 8)" "$HARBOR_REGISTRY_PASSWORD")"
+fi
+
+if [ -z "${HARBOR_CORE_TLS_KEY_B64:-}" ] || [ -z "${HARBOR_CORE_TLS_CERT_B64:-}" ]; then
+  openssl req -x509 -newkey rsa:2048 -nodes -days 3650 -subj '/CN=harbor-core' \
+    -keyout "$TMP/core.key" -out "$TMP/core.crt" >/dev/null 2>&1
+  persist_value HARBOR_CORE_TLS_KEY_B64 "$(base64 < "$TMP/core.key" | tr -d '\n')"
+  persist_value HARBOR_CORE_TLS_CERT_B64 "$(base64 < "$TMP/core.crt" | tr -d '\n')"
+fi
+
 # k8s manifests (namespaces are idempotent; keeps a fresh bootstrap self-contained).
 cat > "$TMP/manifests.yaml" <<YAML
 apiVersion: v1
@@ -40,6 +68,49 @@ metadata:
 type: Opaque
 stringData:
   HARBOR_ADMIN_PASSWORD: "${HARBOR_ADMIN_PASSWORD:?set in secrets.env}"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor-runtime-core
+  namespace: harbor
+type: Opaque
+stringData:
+  secretKey: "${HARBOR_RUNTIME_SECRET_KEY}"
+  secret: "${HARBOR_CORE_SECRET}"
+  CSRF_KEY: "${HARBOR_CORE_XSRF_KEY}"
+  tls.key: |
+$(printf '%s' "$HARBOR_CORE_TLS_KEY_B64" | base64 -d | sed 's/^/    /')
+  tls.crt: |
+$(printf '%s' "$HARBOR_CORE_TLS_CERT_B64" | base64 -d | sed 's/^/    /')
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor-runtime-jobservice
+  namespace: harbor
+type: Opaque
+stringData:
+  JOBSERVICE_SECRET: "${HARBOR_JOBSERVICE_SECRET}"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor-runtime-registry
+  namespace: harbor
+type: Opaque
+stringData:
+  REGISTRY_HTTP_SECRET: "${HARBOR_REGISTRY_HTTP_SECRET}"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor-registry-credentials
+  namespace: harbor
+type: Opaque
+stringData:
+  REGISTRY_PASSWD: "${HARBOR_REGISTRY_PASSWORD}"
+  REGISTRY_HTPASSWD: "${HARBOR_REGISTRY_HTPASSWD}"
 ---
 apiVersion: v1
 kind: Namespace
@@ -72,6 +143,7 @@ type: Opaque
 stringData:
   client_id: "${TS_OAUTH_CLIENT_ID:?set in secrets.env}"
   client_secret: "${TS_OAUTH_CLIENT_SECRET:?set in secrets.env}"
+---
 YAML
 
 # Wrap manifests -> Talos inline-manifest patch -> Omni ConfigPatch (yq handles the
@@ -100,7 +172,5 @@ if [ "${1:-}" = "--apply" ]; then
   omnictl apply -f "$TMP/configpatch.yaml"
   echo "==> applied ConfigPatch 500-cluster-${CLUSTER}-bootstrap-secrets (secrets now in Omni, delivered to cluster)"
 else
-  echo "----- ConfigPatch (dry-run; secret values redacted below) -----"
-  sed -E 's/(HARBOR_ADMIN_PASSWORD|client_secret|github_app_private_key).*/\1: <redacted>/' "$TMP/configpatch.yaml"
-  echo "----- re-run with --apply to push to Omni -----"
+  echo "ConfigPatch rendered and manifests validated; re-run with --apply to push to Omni."
 fi
