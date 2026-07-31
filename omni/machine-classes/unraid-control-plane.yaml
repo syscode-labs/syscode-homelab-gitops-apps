@@ -1,0 +1,19 @@
+metadata:
+  namespace: default
+  type: MachineClasses.omni.sidero.dev
+  id: unraid-cp
+
+spec:
+  autoprovision:
+    providerid: libvirt
+    kernelargs: []
+    metavalues: []
+    providerdata: |
+      cores: 4
+      memory: 4096
+      disk_size: 40
+      storage_pool: "omni-domains"
+      network_interfaces:
+        - driver: "virtio"
+          network_name: "default"
+    grpctunnel: 0
