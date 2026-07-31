@@ -51,12 +51,10 @@ hubble:
   enabled: true
   metrics:
     enabled:
-      - dns
       - drop
       - tcp
       - flow
       - icmp
-      - httpV2
     enableOpenMetrics: true
   relay:
     enabled: true
@@ -68,3 +66,6 @@ hubble:
 # Alloy discovers the chart's annotated Cilium and Hubble metric endpoints.
 prometheus:
   enabled: true
+  metrics:
+    - -cilium_node_health_connectivity_status
+    - -cilium_node_health_connectivity_latency_seconds

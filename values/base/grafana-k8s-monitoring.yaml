@@ -63,20 +63,6 @@ collectors:
     presets: [clustered, statefulset]
   alloy-singleton:
     presets: [singleton]
-collectorCommon:
-  alloy:
-    remoteConfig:
-      enabled: true
-      url: https://fleet-management-prod-023.grafana.net
-      auth:
-        type: basic
-        usernameKey: fleet-username
-        passwordKey: fleet-password
-      secret:
-        create: false
-        name: grafana-cloud
-        namespace: monitoring
-
 telemetryServices:
   kube-state-metrics:
     deploy: true
