@@ -1,0 +1,12 @@
+# Extend the default gitleaks rules and ignore generated inline manifests.
+# These files contain Argo CD chart-generated TLS material (server certs,
+# repo-server certs, etc.) and are not human-managed secrets.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "generated Talos inline manifests"
+paths = [
+  '''omni\/patches\/.*-inline-manifests\.yaml''',
+  '''clusters\/.*\/omni\/inline-manifests\.yaml''',
+]
