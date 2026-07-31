@@ -16,7 +16,7 @@ The `omni/` directory is consumed by Omni tooling, not Argo CD.
 ```text
 bootstrap/              Root-synced Argo CD apps, including App-of-Apps and Tailscale operator
 infrastructure/         Helm charts + values, one directory per app
-clusters/oci/           Cluster-specific kustomize patches
+clusters/oci-lab/       Cluster-specific kustomize patches
 omni/                   Omni machine classes, patches, and cluster templates
 ```
 
