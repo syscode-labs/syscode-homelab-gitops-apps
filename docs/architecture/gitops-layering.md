@@ -68,16 +68,14 @@ Argo Application per app, with the layered `valueFiles`.
 - **custom ApplicationSet** (own generators, e.g. runners) → `application.yaml`
   under `clusters/<name>/apps/<x>/` (raw lane).
 
-## Current state / TODO before merge
+## Current state / TODO
 
-- `appset.yaml` (repo root) is the canonical ApplicationSet; the generate step
-  injects it into each cluster's `inlineManifests` with that cluster's identity.
-  The `argocd` + `argocd-apps` inline blocks are still placeholders (filled by
-  `mise run <cluster>:generate-manifests`) — wire the appset injection into that
-  script.
-- **Not cluster-validated.** Needs a real sync on `unraid-lab` (once Argo CD is
-  bootstrapped there) + a no-op re-sync check on OCI before this replaces the
-  live setup.
+- `appset.yaml` (repo root) is the canonical ApplicationSet. `omni/scripts/generate-manifests.sh`
+  already injects it into each cluster's `inlineManifests` along with the Argo CD
+  install manifest.
+- `unraid-lab` is validated: all Argo CD Applications are **Synced** and **Healthy**.
+- **OCI remains to be validated.** Run a no-op re-sync check on `oci-talos` before
+  the GitOps layering fully replaces the live setup there.
 - Migrated: cert-manager, cilium (shared, `apps/`); harbor, arc-controller
   (unraid-only, `clusters/unraid-lab/apps/`). arc-runners stays a custom
   ApplicationSet on the raw lane.
