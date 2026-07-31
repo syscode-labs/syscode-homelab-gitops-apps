@@ -37,25 +37,6 @@ destinations:
       create: false
       name: grafana-cloud
       namespace: monitoring
-  grafana-cloud-otlp:
-    type: otlp
-    url: https://otlp-gateway-prod-gb-south-1.grafana.net/otlp
-    protocol: http
-    auth:
-      type: basic
-      usernameKey: otlp-username
-      passwordKey: otlp-password
-    secret:
-      create: false
-      name: grafana-cloud
-      namespace: monitoring
-    metrics:
-      enabled: true
-    logs:
-      enabled: true
-    traces:
-      enabled: true
-
 clusterMetrics:
   enabled: true
   collector: alloy-metrics
@@ -66,22 +47,22 @@ clusterEvents:
   enabled: true
   collector: alloy-singleton
 podLogsViaLoki:
-  enabled: true
-  collector: alloy-logs
+  enabled: false
 annotationAutodiscovery:
   enabled: true
   collector: alloy-metrics
+  namespaces: [kube-system]
+  pods:
+    enabled: false
+  services:
+    labelSelectors:
+      k8s-app: hubble
 
 collectors:
   alloy-metrics:
     presets: [clustered, statefulset]
   alloy-singleton:
     presets: [singleton]
-  alloy-logs:
-    presets: [filesystem-log-reader, daemonset]
-  alloy-receiver:
-    presets: [deployment]
-
 collectorCommon:
   alloy:
     remoteConfig:
