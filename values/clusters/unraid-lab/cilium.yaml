@@ -1,0 +1,8 @@
+hubble:
+  ui:
+    ingress:
+      hosts:
+        - hubble-unraid-lab.wind-bearded.ts.net
+      tls:
+        - hosts:
+            - hubble-unraid-lab.wind-bearded.ts.net
