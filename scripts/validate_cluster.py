@@ -14,9 +14,10 @@ import argparse
 import json
 import subprocess
 import sys
+from typing import Optional
 
 
-def get_applications(context: str | None, namespace: str | None):
+def get_applications(context: Optional[str], namespace: Optional[str]):
     cmd = ["kubectl", "get", "applications.argoproj.io", "-o", "json"]
     if namespace:
         cmd += ["-n", namespace]
