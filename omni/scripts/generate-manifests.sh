@@ -7,23 +7,23 @@
 # The static blocks (argocd-bootstrap, argocd-unraid-raw) and every comment are
 # left untouched — yq edits only the named blocks in place.
 #
-# Usage:  omni/scripts/generate-manifests.sh <oci-talos|unraid-lab>
-#   or:   mise run oci:generate-manifests   /   mise run unraid:generate-manifests
+# Usage:  omni/scripts/generate-manifests.sh <oci-lab|unraid-lab>
+#   or:   mise run oci-lab:generate-manifests   /   mise run unraid:generate-manifests
 #
 # Requirements: yq (mikefarah v4), curl, helm, kubectl. Run after Cilium/Argo CD version
 # bumps or appset.yaml changes, then review + commit the result.
 set -euo pipefail
 
-CLUSTER="${1:?usage: generate-manifests.sh <oci-talos|unraid-lab>}"
+CLUSTER="${1:?usage: generate-manifests.sh <oci-lab|unraid-lab>}"
 CILIUM_VERSION="${CILIUM_VERSION:-1.17.2}"
 ARGOCD_VERSION="${ARGOCD_VERSION:-v2.14.4}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 case "$CLUSTER" in
-  oci-talos)
+  oci-lab)
     CLUSTER_TYPE="cloud"
-    FILE="omni/patches/inline-manifests.yaml"
+    FILE="omni/patches/oci-lab-inline-manifests.yaml"
     WITH_CILIUM=1
     ;;
   unraid-lab)
@@ -32,7 +32,7 @@ case "$CLUSTER" in
     WITH_CILIUM=0
     ;;
   *)
-    echo "unknown cluster '$CLUSTER' (expected oci-talos or unraid-lab)" >&2
+    echo "unknown cluster '$CLUSTER' (expected oci-lab or unraid-lab)" >&2
     exit 1
     ;;
 esac

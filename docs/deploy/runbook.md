@@ -6,7 +6,7 @@ material you hold. Do not skip the pre-merge gate (step 5).
 
 Clusters:
 
-- `oci-talos` — type `cloud`, bootstraps its own Cilium (CNI-none Talos).
+- `oci-lab` — type `cloud`, bootstraps its own Cilium (CNI-none Talos).
 - `unraid-lab` — type `homelab-kvm`, no inline Cilium.
 
 ## 1. Confirm the Harbor endpoint
@@ -21,9 +21,9 @@ Fills each cluster's `argocd` (install), `argocd-apps` (appset with that
 cluster's identity), and — OCI only — `cilium` block:
 
 ```bash
-mise run oci:generate-manifests
+mise run oci-lab:generate-manifests
 mise run unraid:generate-manifests
-git add omni/patches/inline-manifests.yaml clusters/unraid-lab/omni/inline-manifests.yaml
+git add omni/patches/oci-lab-inline-manifests.yaml clusters/unraid-lab/omni/inline-manifests.yaml
 git commit -m "chore: generate inline-manifests for deploy"
 ```
 

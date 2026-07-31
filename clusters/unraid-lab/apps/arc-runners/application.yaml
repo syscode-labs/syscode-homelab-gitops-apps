@@ -22,7 +22,7 @@ spec:
           #   server: https://kubernetes.default.svc
           #   namespace: arc-runners
           #   scaleSetName: arc-runners-oci
-          #   valuesPath: clusters/oci/apps/arc-runners/values.yaml
+          #   valuesPath: clusters/oci-lab/apps/arc-runners/values.yaml
   template:
     metadata:
       name: "{{ .cluster }}-{{ .scaleSetName }}"

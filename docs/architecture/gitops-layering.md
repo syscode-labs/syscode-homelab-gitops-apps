@@ -74,7 +74,7 @@ Argo Application per app, with the layered `valueFiles`.
   already injects it into each cluster's `inlineManifests` along with the Argo CD
   install manifest.
 - `unraid-lab` is validated: all Argo CD Applications are **Synced** and **Healthy**.
-- **OCI remains to be validated.** Run a no-op re-sync check on `oci-talos` before
+- **OCI remains to be validated.** Run a no-op re-sync check on `oci-lab` before
   the GitOps layering fully replaces the live setup there.
 - Migrated: cert-manager, cilium (shared, `apps/`); harbor, arc-controller
   (unraid-only, `clusters/unraid-lab/apps/`). arc-runners stays a custom

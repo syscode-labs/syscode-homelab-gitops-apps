@@ -1,5 +1,5 @@
 kind: Cluster
-name: oci-talos
+name: oci-lab
 labels:
   environment: oci
 kubernetes:
@@ -14,7 +14,7 @@ patches:
   - file: ../patches/cni-none.yaml
   - file: ../patches/disable-kube-proxy.yaml
   - file: ../patches/allow-scheduling.yaml
-  - file: ../patches/inline-manifests.yaml
+  - file: ../patches/oci-lab-inline-manifests.yaml
 controlPlane:
   machineClass:
     name: oci-cp
