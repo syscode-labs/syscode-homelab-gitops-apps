@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: radar-pg
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/syscode-labs/radar-postgre.git
+      targetRevision: 9f22278a615c5c2863fa6059c4ab7192c3e57cb6
+      path: deploy/helm/radar
+      helm:
+        releaseName: radar-pg
+        valueFiles:
+          - $values/values/clusters/unraid-lab/radar-pg.yaml
+    - repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: radar-pg
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

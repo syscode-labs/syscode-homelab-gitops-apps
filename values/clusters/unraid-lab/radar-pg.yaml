@@ -1,0 +1,26 @@
+image:
+  repository: ghcr.io/syscode-labs/radar-postgre
+  tag: 1.8.7-pg.1
+  digest: sha256:2101216e545c6cfc81070bcb98a8c9fdbda70ae9201f67d937696233109174a6
+
+imagePullSecrets:
+  - name: ghcr-syscode-labs
+
+timeline:
+  storage: postgres
+  retention: 720h
+  postgres:
+    existingSecret: radar-postgres-dsn
+    secretKey: dsn
+
+ingress:
+  enabled: true
+  className: tailscale
+  hosts:
+    - host: radar-pg-unraid-lab.wind-bearded.ts.net
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - radar-pg-unraid-lab.wind-bearded.ts.net
