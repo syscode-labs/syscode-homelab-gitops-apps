@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://github.com/syscode-labs/radar-postgre.git
+    - repoURL: git@github.com:syscode-labs/radar-postgre.git
       targetRevision: 9f22278a615c5c2863fa6059c4ab7192c3e57cb6
       path: deploy/helm/radar
       helm:
