@@ -4,12 +4,12 @@ labels:
   environment: oci
 kubernetes:
   # Not touched by the talos-images upgrade workflow — bump deliberately, one
-  # minor at a time. Talos 1.13.x supports k8s 1.31–1.36 (SupportedKubernetesVersions=6
-  # counting back from its 1.36.2 default), so this is valid as-is.
-  version: v1.32.3
+  # minor at a time. Talos 1.14.x supports k8s 1.31–1.37 (SupportedKubernetesVersions=6
+  # counting back from its 1.37.0 default), so this is valid as-is.
+  version: v1.37.0-beta.0
 talos:
   # Keep in step with installImage in omni/machine-classes/*.yaml.
-  version: v1.13.5
+  version: v1.14.0-beta.1
 patches:
   - file: ../patches/cni-none.yaml
   - file: ../patches/disable-kube-proxy.yaml
@@ -18,7 +18,7 @@ patches:
 controlPlane:
   machineClass:
     name: oci-cp
-    size: 3
+    size: 1
 workers:
   - machineClass:
       name: oci-worker
