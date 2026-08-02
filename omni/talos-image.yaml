@@ -3,5 +3,5 @@ talos_version: v1.13.7
 kubernetes_version: v1.36.2
 schematic_id: 376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
 early_tailscale_image: ghcr.io/syscode-labs/talos-images/tailscale-early:v1.13.7
-oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaa57oxrwfqq2kry4lqp42edugso6gbonwhfktwy7hnnoih7vku5fxq
-updated_at: 2026-07-26T05:32:35Z
+oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaaxti4ckz7p7gxgc2fbu23naiqqb4xggaluujgjofwscnfmufxq5dq
+updated_at: 2026-08-02T05:26:21Z
