@@ -18,7 +18,13 @@ kubernetes: v1.36.3
 clusters:
   # Sacrificial canary. Always takes a prerelease first; recovery is destroy
   # and re-provision at the previous pin, never a Talos downgrade.
-  unraid-lab: {}
+  unraid-lab:
+    # POC canary for the 1.14 features (openspec: automate-talos-upgrade-pipeline,
+    # task 8.3). Kubernetes is pinned explicitly because it must not inherit the
+    # global v1.36.3, which belongs to the 1.13 line. Value is Talos 1.14.0-beta.1's
+    # DefaultKubernetesVersion.
+    talos: v1.14.0-beta.1
+    kubernetes: v1.37.0-beta.0
 
   # No etcd restore point yet — promotion is gated on a verified backup.
   oci-lab: {}
