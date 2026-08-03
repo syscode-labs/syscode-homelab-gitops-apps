@@ -1,0 +1,24 @@
+---
+# Desired Talos / Kubernetes versions. HAND-OWNED — edit this file to upgrade.
+#
+# Build outputs (schematic_id, oci_image_ocid, installer and extension image
+# refs) live in talos-image.yaml, which is rewritten wholesale by the
+# talos-images build workflow. Never put desired versions there: that file
+# records what has been built, not what is intended to run.
+#
+# Clusters inherit the global pin. A cluster entry overrides it.
+#
+# Kubernetes is never inherited across a diverging Talos target: a cluster that
+# overrides `talos` without `kubernetes` derives its Kubernetes version from
+# the supported versions of its own Talos target, not from the global pin.
+
+talos: v1.13.7
+kubernetes: v1.36.3
+
+clusters:
+  # Sacrificial canary. Always takes a prerelease first; recovery is destroy
+  # and re-provision at the previous pin, never a Talos downgrade.
+  unraid-lab: {}
+
+  # No etcd restore point yet — promotion is gated on a verified backup.
+  oci-lab: {}
