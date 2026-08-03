@@ -61,6 +61,11 @@ jobs:
           pip install pyyaml --quiet
           python3 scripts/validate.py
 
+      - name: Check for version drift against versions.yaml
+        run: |
+          python3 scripts/check-version-drift.py --selftest
+          python3 scripts/check-version-drift.py
+
   pluto:
     name: API deprecation check
     runs-on: ubuntu-latest
@@ -70,7 +75,14 @@ jobs:
       - name: Read target Kubernetes version
         id: k8s
         run: |
-          K8S_VERSION=$(grep '^kubernetes_version:' omni/talos-image.yaml | awk '{print $2}')
+          # Desired version, from versions.yaml — NOT talos-image.yaml, which
+          # is the build ledger and records what was last built. Reading the
+          # ledger here checked deprecations against a version no cluster runs.
+          K8S_VERSION=$(grep '^kubernetes:' omni/versions.yaml | awk '{print $2}')
+          if [[ -z "$K8S_VERSION" ]]; then
+            echo "ERROR: no kubernetes pin in omni/versions.yaml" >&2
+            exit 1
+          fi
           echo "version=${K8S_VERSION}" >> "$GITHUB_OUTPUT"
           echo "Checking against Kubernetes ${K8S_VERSION}"
 
