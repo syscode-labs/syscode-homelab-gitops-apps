@@ -61,6 +61,11 @@ jobs:
           pip install pyyaml --quiet
           python3 scripts/validate.py
 
+      - name: Check for version drift against versions.yaml
+        run: |
+          python3 scripts/check-version-drift.py --selftest
+          python3 scripts/check-version-drift.py
+
   pluto:
     name: API deprecation check
     runs-on: ubuntu-latest
