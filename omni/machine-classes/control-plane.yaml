@@ -4,7 +4,7 @@ metadata:
   type: MachineClasses.omni.sidero.dev
   id: oci-cp
 spec:
-  installImage: ghcr.io/syscode-labs/talos-images/installer:v1.14.0-beta.1
+  installImage: ghcr.io/syscode-labs/talos-images/installer:v1.13.7
   matchLabels:
     # Synced into Omni; UI can select this class after machines join.
     # Labels may be assigned by automation or, for lab recovery, in Omni UI.
