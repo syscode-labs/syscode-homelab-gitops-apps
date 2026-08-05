@@ -10,6 +10,10 @@ kubernetes:
 talos:
   # Keep in step with installImage in omni/machine-classes/*.yaml.
   version: v1.13.7
+# Patch paths traverse upward, so every omnictl call against this file needs
+# --allowed-dir. `sync` works with it; `status` without it fails with
+#   failed to access "../patches/cni-none.yaml": path escapes from parent
+# Use: omnictl cluster template <cmd> --allowed-dir "$PWD/omni" -f <this file>
 patches:
   - file: ../patches/cni-none.yaml
   - file: ../patches/disable-kube-proxy.yaml
