@@ -15,9 +15,13 @@ nothing failed until a cluster refused its config.
 Runs identically locally and in CI — `python3 scripts/check-version-drift.py`.
 """
 
+import json
 import os
 import re
+import ssl
 import sys
+import urllib.error
+import urllib.request
 
 import yaml
 
@@ -31,6 +35,53 @@ OCI_LAB_FILES = [
     "omni/machine-classes/control-plane.yaml",
     "omni/machine-classes/worker.yaml",
 ]
+
+
+INSTALLER_IMAGE = "ghcr.io/syscode-labs/talos-images/installer"
+
+
+def installer_built(tag):
+    """True if the talos-images installer image for this tag already exists in
+    ghcr.io.
+
+    Machine-class installImage points at this image. The talos-images build
+    pushes a tag only for versions it has actually built. --write must never
+    point oci-lab at an installer tag that does not exist, or provisioning
+    would pull a nonexistent image. The build may legitimately be in flight;
+    use --allow-unbuilt to override (the talos-images job does, once it has
+    pushed the tag).
+    System Python versions (incl. macOS frameworks' 3.7) often lack a working
+    default SLL trust store; point at the platform CA bundle so the check runs
+    identically in CI (Ubuntu 3.11) and dev.
+    """
+    repo = INSTALLER_IMAGE[len("ghcr.io/"):]
+    ctx = ssl.create_default_context()
+    for cafile in ("/etc/ssl/cert.pem", "/etc/ssl/certs/ca-certificates.crt"):
+        if os.path.exists(cafile):
+            ctx = ssl.create_default_context(cafile=cafile)
+            break
+    tok = urllib.request.urlopen(
+        "https://ghcr.io/token?scope=repository:%s:pull" % repo,
+        context=ctx,
+    )
+    token = json.load(tok)["token"]
+    req = urllib.request.Request(
+        "https://ghcr.io/v2/%s/manifests/%s" % (repo, tag),
+        headers={
+            "Authorization": "Bearer %s" % token,
+            "Accept": "application/vnd.docker.distribution.manifest.list.v2+json, "
+            "application/vnd.docker.distribution.manifest.v2+json, "
+            "application/vnd.oci.image.index.v1+json, "
+            "application/vnd.oci.image.manifest.v1+json",
+        },
+    )
+    try:
+        urllib.request.urlopen(req, context=ctx)
+        return True
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return False
+        raise
 
 
 def resolve(versions, cluster):
@@ -158,6 +209,10 @@ def write():
         resolved (a talos override with no explicit kubernetes pin), so it can
         never invent a pairing that violates the Kubernetes-never-inherited
         rule.
+      * It refuses to set machine-class installImage to an installer tag the
+        talos-images build has not yet pushed (see installer_built), so a
+        versions.yaml bump to a not-yet-built version cannot point oci-lab at
+        a nonexistent image. --allow-unbuilt overrides for the build itself.
     """
     path = os.path.join(ROOT, "omni/versions.yaml")
     with open(path) as fh:
@@ -173,6 +228,16 @@ def write():
             "ERROR: oci-lab overrides talos to %s with no kubernetes pin; "
             "cannot write a pairing. Pin kubernetes in versions.yaml first."
             % talos
+        )
+        return 1
+
+    allow_unbuilt = "--allow-unbuilt" in sys.argv
+    if not allow_unbuilt and not installer_built(talos):
+        print(
+            "ERROR: installer image %s:%s has not been built yet. The "
+            "talos-images build must push it before oci-lab can install it. "
+            "Do not flip versions.yaml ahead of a build. "
+            "(--allow-unbuilt overrides.)" % (INSTALLER_IMAGE, talos)
         )
         return 1
 
