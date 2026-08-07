@@ -1,3 +1,9 @@
+# LAN VIP for opt-in LoadBalancer Services (openspec: add-metallb-lan-exposure).
+# Reuses Cilium's native LB-IPAM + L2 announcement instead of a separate
+# MetalLB install — same ARP mechanism, already running as the CNI.
+l2announcements:
+  enabled: true
+
 hubble:
   ui:
     ingress:
