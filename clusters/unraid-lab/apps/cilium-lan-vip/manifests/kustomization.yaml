@@ -3,4 +3,6 @@ kind: Kustomization
 
 resources:
   - ipaddresspool.yaml
-  - l2announcementpolicy.yaml
+  - bgpclusterconfig.yaml
+  - bgppeerconfig.yaml
+  - bgpadvertisement.yaml
