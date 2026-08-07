@@ -23,7 +23,7 @@ cluster's identity), and — OCI only — `cilium` block:
 ```bash
 mise run oci-lab:generate-manifests
 mise run unraid:generate-manifests
-git add omni/patches/oci-lab-inline-manifests.yaml clusters/unraid-lab/omni/inline-manifests.yaml
+git add omni/cluster-templates/patches/oci-lab-inline-manifests.yaml clusters/unraid-lab/omni/inline-manifests.yaml
 git commit -m "chore: generate inline-manifests for deploy"
 ```
 

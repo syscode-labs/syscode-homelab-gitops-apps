@@ -10,15 +10,13 @@ kubernetes:
 talos:
   # Keep in step with installImage in omni/machine-classes/*.yaml.
   version: v1.13.7
-# Patch paths traverse upward, so every omnictl call against this file needs
-# --allowed-dir. `sync` works with it; `status` without it fails with
-#   failed to access "../patches/cni-none.yaml": path escapes from parent
-# Use: omnictl cluster template <cmd> --allowed-dir "$PWD/omni" -f <this file>
+# Patches live in the sibling patches/ directory, so paths no longer traverse
+# upward and no `--allowed-dir` flag is needed. `status` now works without it.
 patches:
-  - file: ../patches/cni-none.yaml
-  - file: ../patches/disable-kube-proxy.yaml
-  - file: ../patches/allow-scheduling.yaml
-  - file: ../patches/oci-lab-inline-manifests.yaml
+  - file: patches/cni-none.yaml
+  - file: patches/disable-kube-proxy.yaml
+  - file: patches/allow-scheduling.yaml
+  - file: patches/oci-lab-inline-manifests.yaml
 ---
 # omnictl requires ControlPlane and Workers as SEPARATE documents. They were
 # nested under the Cluster document, which omnictl rejects outright:
