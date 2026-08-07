@@ -89,7 +89,8 @@ def main():
                         "Talos pin %s" % (rel, tag, talos)
                     )
         else:
-            doc = yaml.safe_load(text) or {}
+            docs = [d for d in yaml.safe_load_all(text) if d and d.get("kind") == "Cluster"]
+            doc = docs[0] if docs else {}
             got_talos = (doc.get("talos") or {}).get("version")
             got_k8s = (doc.get("kubernetes") or {}).get("version")
             if got_talos != talos:
