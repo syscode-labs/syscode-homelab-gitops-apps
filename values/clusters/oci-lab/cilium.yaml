@@ -1,0 +1,8 @@
+hubble:
+  ui:
+    ingress:
+      hosts:
+        - hubble-oci-lab.wind-bearded.ts.net
+      tls:
+        - hosts:
+            - hubble-oci-lab.wind-bearded.ts.net

@@ -10,16 +10,25 @@ kubernetes:
 talos:
   # Keep in step with installImage in omni/machine-classes/*.yaml.
   version: v1.13.7
+# Patches live in the sibling patches/ directory, so paths no longer traverse
+# upward and no `--allowed-dir` flag is needed. `status` now works without it.
 patches:
-  - file: ../patches/cni-none.yaml
-  - file: ../patches/disable-kube-proxy.yaml
-  - file: ../patches/allow-scheduling.yaml
-  - file: ../patches/oci-lab-inline-manifests.yaml
-controlPlane:
-  machineClass:
-    name: oci-cp
-    size: 1
-workers:
-  - machineClass:
-      name: oci-worker
-      size: 1
+  - file: patches/cni-none.yaml
+  - file: patches/disable-kube-proxy.yaml
+  - file: patches/allow-scheduling.yaml
+  - file: patches/oci-lab-inline-manifests.yaml
+---
+# omnictl requires ControlPlane and Workers as SEPARATE documents. They were
+# nested under the Cluster document, which omnictl rejects outright:
+#   field controlPlane not found in type models.Cluster
+#   field workers not found in type models.Cluster
+# So this template was never syncable in that form.
+kind: ControlPlane
+machineClass:
+  name: oci-cp
+  size: 1
+---
+kind: Workers
+machineClass:
+  name: oci-worker
+  size: 1

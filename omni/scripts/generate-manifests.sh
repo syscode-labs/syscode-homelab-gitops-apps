@@ -23,7 +23,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 case "$CLUSTER" in
   oci-lab)
     CLUSTER_TYPE="cloud"
-    FILE="omni/patches/oci-lab-inline-manifests.yaml"
+    FILE="omni/cluster-templates/patches/oci-lab-inline-manifests.yaml"
     WITH_CILIUM=1
     ;;
   unraid-lab)
