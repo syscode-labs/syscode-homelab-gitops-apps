@@ -1,7 +1,9 @@
 # LAN VIP for opt-in LoadBalancer Services (openspec: add-metallb-lan-exposure).
-# Reuses Cilium's native LB-IPAM + L2 announcement instead of a separate
-# MetalLB install — same ARP mechanism, already running as the CNI.
-l2announcements:
+# L2 announcement doesn't work here: unraid-lab's nodes sit on libvirt's NAT'd
+# 192.168.122.0/24, not the physical LAN, so gratuitous ARP is undeliverable.
+# BGP routes around that instead — peers with wrt-london over the tailnet
+# path already used for Omni join, no L2 presence needed.
+bgpControlPlane:
   enabled: true
 
 hubble:
