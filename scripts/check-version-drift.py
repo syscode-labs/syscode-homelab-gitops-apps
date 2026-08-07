@@ -144,7 +144,91 @@ def selftest():
     return 0
 
 
+def write():
+    """Repair the derived, owned files from versions.yaml, the source of
+    truth. The counterpart to main(): where main() reports drift, --write
+    makes the derived files agree with versions.yaml so the gate goes green.
+
+    Conservative by design:
+      * It only edits files this repo owns and that versions.yaml drives
+        (oci-lab's machine classes and cluster template). It never touches
+        omni/talos-image.yaml, a machine-owned build ledger.
+      * It refuses to write when oci-lab's Kubernetes version cannot be
+        resolved (a talos override with no explicit kubernetes pin), so it can
+        never invent a pairing that violates the Kubernetes-never-inherited
+        rule.
+    """
+    path = os.path.join(ROOT, "omni/versions.yaml")
+    with open(path) as fh:
+        versions = yaml.safe_load(fh) or {}
+
+    if not versions.get("talos") or not versions.get("kubernetes"):
+        print("ERROR: omni/versions.yaml must set both talos and kubernetes")
+        return 1
+
+    talos, k8s = resolve(versions, "oci-lab")
+    if k8s is None:
+        print(
+            "ERROR: oci-lab overrides talos to %s with no kubernetes pin; "
+            "cannot write a pairing. Pin kubernetes in versions.yaml first."
+            % talos
+        )
+        return 1
+
+    if _write(talos, k8s):
+        print(
+            "Rewrote derived files to match omni/versions.yaml "
+            "(oci-lab: Talos %s, Kubernetes %s)." % (talos, k8s)
+        )
+        return 0
+    print("No drift to repair; files already agree with omni/versions.yaml.")
+    return 0
+
+
+def _write(talos, k8s):
+    changed = False
+    for rel in OCI_LAB_FILES:
+        full = os.path.join(ROOT, rel)
+        if not os.path.exists(full):
+            continue
+        text = open(full).read()
+        new = text
+
+        if "machine-classes" in rel:
+            # Swap the installer image tag (e.g. :v1.13.7) for the pinned Talos
+            # version, preserving the image path and any variant suffix that
+            # precedes the tag.
+            new = re.sub(
+                r"(\binstallImage:\s*\S+):(v\d[\w.-]*)",
+                lambda m: "%s:%s" % (m.group(1), talos),
+                new,
+            )
+        else:
+            # Rewrite talos.version and kubernetes.version top-level blocks.
+            # Scope each to its own block so a boundary `version:` line in a
+            # nested document is never conflated with the one we mean.
+            new = re.sub(
+                r"(?m)^kubernetes:\s*\n(\s*version:)\s*\S+",
+                lambda m: "kubernetes:\n%s %s" % (m.group(1), k8s),
+                new,
+            )
+            new = re.sub(
+                r"(?m)^talos:\s*\n(\s*version:)\s*\S+",
+                lambda m: "talos:\n%s %s" % (m.group(1), talos),
+                new,
+            )
+
+        if new != text:
+            with open(full, "w") as fh:
+                fh.write(new)
+            changed = True
+            print("  rewrote %s" % rel)
+    return changed
+
+
 if __name__ == "__main__":
     if "--selftest" in sys.argv:
         sys.exit(selftest())
+    if "--write" in sys.argv:
+        sys.exit(write())
     sys.exit(main())
