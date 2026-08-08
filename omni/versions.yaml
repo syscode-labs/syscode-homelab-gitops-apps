@@ -12,19 +12,18 @@
 # overrides `talos` without `kubernetes` derives its Kubernetes version from
 # the supported versions of its own Talos target, not from the global pin.
 
-talos: v1.13.7
-kubernetes: v1.36.3
+talos: v1.14.0-beta.1
+kubernetes: v1.37.0-beta.0
 
 clusters:
-  # Sacrificial canary. Always takes a prerelease first; recovery is destroy
-  # and re-provision at the previous pin, never a Talos downgrade.
+  # unraid-lab piloted 1.14 first (openspec: automate-talos-upgrade-pipeline,
+  # task 8.3); the global pin has since caught up to match. Kept as an
+  # explicit override, not removed, so this stays true even if the global
+  # pin moves again independently.
   unraid-lab:
-    # POC canary for the 1.14 features (openspec: automate-talos-upgrade-pipeline,
-    # task 8.3). Kubernetes is pinned explicitly because it must not inherit the
-    # global v1.36.3, which belongs to the 1.13 line. Value is Talos 1.14.0-beta.1's
-    # DefaultKubernetesVersion.
     talos: v1.14.0-beta.1
     kubernetes: v1.37.0-beta.0
 
-  # No etcd restore point yet — promotion is gated on a verified backup.
+  # Never successfully bootstrapped — no live state to protect, no backup
+  # gate needed. Inherits the global pin like any other cluster.
   oci-lab: {}
