@@ -26362,3 +26362,30 @@ cluster:
             automated:
               prune: true
               selfHeal: true
+    - name: argocd-oci-raw
+      contents: |
+        # Raw lane for oci-lab (mirrors argocd-unraid-raw): plain-manifest
+        # apps that aren't a chart-app, e.g. cert-manager Issuer/Certificate.
+        apiVersion: argoproj.io/v1alpha1
+        kind: Application
+        metadata:
+          name: oci-raw
+          namespace: argocd
+        spec:
+          project: default
+          source:
+            repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
+            targetRevision: HEAD
+            path: clusters/oci-lab/apps
+            directory:
+              recurse: true
+              include: "*/application.yaml"
+          destination:
+            server: https://kubernetes.default.svc
+            namespace: argocd
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+            syncOptions:
+              - CreateNamespace=true

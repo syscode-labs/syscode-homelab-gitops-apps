@@ -1,0 +1,24 @@
+# oci-lab-only. Self-signed cert for bitwarden-sdk-server (ESO's Bitwarden
+# Secrets Manager companion) — the chart expects this Secret pre-existing,
+# doesn't generate it. Depends on cert-manager (shared apps/cert-manager)
+# already being up, which it is on every cluster.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bitwarden-sdk-server-tls
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+    targetRevision: HEAD
+    path: clusters/oci-lab/apps/bitwarden-sdk-server-tls/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: external-secrets
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

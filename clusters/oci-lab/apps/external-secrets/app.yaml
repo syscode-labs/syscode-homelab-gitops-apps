@@ -1,0 +1,5 @@
+# oci-lab-only chart-app. Base + cluster values layer.
+chart: external-secrets
+repoURL: https://charts.external-secrets.io
+version: "2.9.0"
+namespace: external-secrets
