@@ -6,7 +6,10 @@ metadata:
     advertise: unraid-lab-lan
 spec:
   advertisements:
-    - advertisementType: LBServiceAddress
+    - advertisementType: Service
+      service:
+        addresses:
+          - LoadBalancerIP
       selector:
         matchLabels:
           syscode.dev/lan-vip: "true"
