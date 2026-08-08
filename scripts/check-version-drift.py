@@ -272,15 +272,18 @@ def _write(talos, k8s):
         else:
             # Rewrite talos.version and kubernetes.version top-level blocks.
             # Scope each to its own block so a boundary `version:` line in a
-            # nested document is never conflated with the one we mean.
+            # nested document is never conflated with the one we mean. Any
+            # comment lines between the key and `version:` (e.g. oci-lab.yaml's
+            # "keep in step with..." notes) are preserved verbatim, not just
+            # tolerated in the match — only the value after `version:` changes.
             new = re.sub(
-                r"(?m)^kubernetes:\s*\n(\s*version:)\s*\S+",
-                lambda m: "kubernetes:\n%s %s" % (m.group(1), k8s),
+                r"(?m)^kubernetes:\n((?:[ \t]*#.*\n)*)(\s*version:)\s*\S+",
+                lambda m: "kubernetes:\n%s%s %s" % (m.group(1), m.group(2), k8s),
                 new,
             )
             new = re.sub(
-                r"(?m)^talos:\s*\n(\s*version:)\s*\S+",
-                lambda m: "talos:\n%s %s" % (m.group(1), talos),
+                r"(?m)^talos:\n((?:[ \t]*#.*\n)*)(\s*version:)\s*\S+",
+                lambda m: "talos:\n%s%s %s" % (m.group(1), m.group(2), talos),
                 new,
             )
 
