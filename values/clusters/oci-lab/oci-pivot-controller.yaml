@@ -1,5 +1,5 @@
-# CompartmentId is the OCID of the compartment holding oci-lab's VCN.
-# verify: fill in from oci-free-tier-manager's terraform state/output before
-# first sync — ArgoCD will leave this app Degraded until it's set correctly.
+# CompartmentId is the OCID of the "syscode-homelab" compartment, verified
+# via `oci --profile syscode-labs compute instance list` (hosts
+# oci-talos-cp-1, oci-talos-worker-1, oci-bastion-01, oci-micro-01).
 oci:
-  compartmentId: "ocid1.compartment.oc1..REPLACE_ME"
+  compartmentId: "ocid1.compartment.oc1..REDACTED"
