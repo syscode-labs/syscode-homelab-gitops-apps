@@ -1,0 +1,5 @@
+# CompartmentId is the OCID of the compartment holding oci-lab's VCN.
+# verify: fill in from oci-free-tier-manager's terraform state/output before
+# first sync — ArgoCD will leave this app Degraded until it's set correctly.
+oci:
+  compartmentId: "ocid1.compartment.oc1..REPLACE_ME"

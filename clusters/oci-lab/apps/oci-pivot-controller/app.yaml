@@ -1,0 +1,5 @@
+# oci-lab-only chart-app. Base + cluster values layer.
+chart: oci-pivot-controller
+repoURL: ghcr.io/syscode-labs/charts
+version: "1.0.1"
+namespace: oci-pivot-system
