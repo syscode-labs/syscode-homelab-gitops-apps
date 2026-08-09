@@ -1,5 +1,8 @@
 # syscode-homelab-gitops-apps
 
+[![CI](https://github.com/syscode-labs/syscode-homelab-gitops-apps/actions/workflows/ci.yml/badge.svg)](https://github.com/syscode-labs/syscode-homelab-gitops-apps/actions/workflows/ci.yml)
+[![Reconcile derived versions](https://github.com/syscode-labs/syscode-homelab-gitops-apps/actions/workflows/reconcile.yml/badge.svg)](https://github.com/syscode-labs/syscode-homelab-gitops-apps/actions/workflows/reconcile.yml)
+
 > Active migration. `unraid-lab` validated (all Applications Synced/Healthy);
 > `oci-lab` not yet re-validated — see
 > [docs/architecture/gitops-layering.md](docs/architecture/gitops-layering.md#current-state--todo).
