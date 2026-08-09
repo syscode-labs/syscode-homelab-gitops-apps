@@ -24671,6 +24671,13 @@ cluster:
                   name: webhook
                 - containerPort: 8080
                   name: metrics
+                resources:
+                  limits:
+                    cpu: 200m
+                    memory: 256Mi
+                  requests:
+                    cpu: 20m
+                    memory: 64Mi
                 securityContext:
                   allowPrivilegeEscalation: false
                   capabilities:
@@ -24779,6 +24786,13 @@ cluster:
                 - containerPort: 5556
                 - containerPort: 5557
                 - containerPort: 5558
+                resources:
+                  limits:
+                    cpu: 100m
+                    memory: 128Mi
+                  requests:
+                    cpu: 20m
+                    memory: 32Mi
                 securityContext:
                   allowPrivilegeEscalation: false
                   capabilities:
@@ -24898,6 +24912,13 @@ cluster:
                   tcpSocket:
                     port: 9001
                 name: argocd-notifications-controller
+                resources:
+                  limits:
+                    cpu: 100m
+                    memory: 128Mi
+                  requests:
+                    cpu: 20m
+                    memory: 32Mi
                 securityContext:
                   allowPrivilegeEscalation: false
                   capabilities:
@@ -24984,6 +25005,13 @@ cluster:
                 name: redis
                 ports:
                 - containerPort: 6379
+                resources:
+                  limits:
+                    cpu: 200m
+                    memory: 128Mi
+                  requests:
+                    cpu: 50m
+                    memory: 32Mi
                 securityContext:
                   allowPrivilegeEscalation: false
                   capabilities:
@@ -25277,6 +25305,13 @@ cluster:
                     port: 8084
                   initialDelaySeconds: 5
                   periodSeconds: 10
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 512Mi
+                  requests:
+                    cpu: 100m
+                    memory: 128Mi
                 securityContext:
                   allowPrivilegeEscalation: false
                   capabilities:
@@ -25690,6 +25725,13 @@ cluster:
                     port: 8080
                   initialDelaySeconds: 3
                   periodSeconds: 30
+                resources:
+                  limits:
+                    cpu: 300m
+                    memory: 256Mi
+                  requests:
+                    cpu: 50m
+                    memory: 64Mi
                 securityContext:
                   allowPrivilegeEscalation: false
                   capabilities:
@@ -26037,6 +26079,13 @@ cluster:
                     port: 8082
                   initialDelaySeconds: 5
                   periodSeconds: 10
+                resources:
+                  limits:
+                    cpu: "1"
+                    memory: 768Mi
+                  requests:
+                    cpu: 250m
+                    memory: 256Mi
                 securityContext:
                   allowPrivilegeEscalation: false
                   capabilities:
