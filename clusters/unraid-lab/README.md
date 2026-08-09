@@ -1,9 +1,9 @@
 # clusters/unraid-lab
 
-Apps scoped to the Omni-managed **`unraid-lab`** Talos cluster. The repo's shared
-`bootstrap/argocd-app-of-apps.yaml` only syncs `infrastructure/` (shared across
-clusters); it does **not** sync `clusters/`. So apps placed here run on
-`unraid-lab` only and never land on OCI.
+Apps scoped to the Omni-managed **`unraid-lab`** Talos cluster. The `apps`
+ApplicationSet's `clusters/<name>/apps/*/app.yaml` generator only matches
+`unraid-lab`, so apps placed here run on `unraid-lab` only and never land on
+OCI. Details: [docs/architecture/gitops-layering.md](../../docs/architecture/gitops-layering.md).
 
 First apps:
 
@@ -14,22 +14,23 @@ First apps:
 
 ## Wiring (how these apps get synced)
 
-The `unraid-lab` cluster's inline root Argo CD Application (defined in its Omni
-cluster template — see `omni-on-unraid` / the Omni machine config) must sync
-**both**:
+`unraid-lab`'s Talos `inlineManifests` (generated via
+`mise run unraid:generate-manifests`, see
+[docs/deploy/runbook.md](../../docs/deploy/runbook.md)) install Argo CD, then
+seed three roots directly — no per-cluster app-of-apps file:
 
-- `bootstrap/` — shared infra (Argo CD app-of-apps → `infrastructure/*`).
-- `clusters/unraid-lab/app-of-apps.yaml` — this cluster's app-of-apps
-  (→ `clusters/unraid-lab/apps/*`).
+- `apps` (ApplicationSet) — chart-apps, including this directory's `app.yaml`s.
+- `bootstrap` (Application) — syncs `bootstrap/` (Tailscale operator, Argo CD CM patches).
+- `unraid-lab-raw` (Application) — syncs `clusters/unraid-lab/apps/*/application.yaml`
+  (custom ApplicationSets, e.g. `arc-runners`).
 
 ## Prerequisites / action items
 
-- [ ] **Argo CD + Tailscale operator on `unraid-lab`.** Bootstrap Argo CD via
-  Talos `cluster.inlineManifests` (as OCI does); install the Tailscale operator
+- [x] **Argo CD + Tailscale operator on `unraid-lab`.** Bootstrapped via Talos
+  `cluster.inlineManifests`; Tailscale operator installed
   (`bootstrap/tailscale-operator.yaml`) for the `tailscale` IngressClass + auto
-  TLS.
-- [ ] Point the inline root Application at `clusters/unraid-lab/app-of-apps.yaml`
-  (plus `bootstrap/`).
+  TLS. Cluster validated: all Argo CD Applications Synced/Healthy (see
+  [docs/architecture/gitops-layering.md](../../docs/architecture/gitops-layering.md#current-state--todo)).
 - [x] Set `values/base/harbor.yaml` to the real MagicDNS name
   (`externalURL` + `expose.ingress.hosts.core` → `harbor.wind-bearded.ts.net`).
 - [ ] Create the `harbor-admin-password` Secret (`HARBOR_ADMIN_PASSWORD`) in the

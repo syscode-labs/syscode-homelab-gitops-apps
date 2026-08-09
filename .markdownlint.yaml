@@ -1,1 +1,3 @@
 MD013: false  # line-length: URLs and long paths make this impractical
+MD033:
+  allowed_elements: [details, summary]  # README_AUTHORING_POLICY collapses reference material this way
