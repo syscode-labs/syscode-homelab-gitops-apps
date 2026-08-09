@@ -79,6 +79,76 @@ patches:
       - op: add
         path: /spec/template/spec/containers/0/args/-
         value: --insecure
+  # Upstream ships every ArgoCD component with NO resource requests/limits.
+  # Without a memory limit kubelet can't cgroup-cap the container, so a
+  # runaway controller (application-controller diffing every Application,
+  # repo-server cloning/templating) grows until the kernel OOM-killer
+  # intervenes reactively — which is what starved a whole homelab VM (all
+  # three unraid-lab nodes share one 12-core host with no libvirt cputune
+  # fairness) rather than kubelet enforcing a sane cap up front.
+  - target:
+      kind: StatefulSet
+      name: argocd-application-controller
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests: {cpu: 250m, memory: 256Mi}
+          limits: {cpu: "1", memory: 768Mi}
+  - target:
+      kind: Deployment
+      name: argocd-repo-server
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests: {cpu: 100m, memory: 128Mi}
+          limits: {cpu: 500m, memory: 512Mi}
+  - target:
+      kind: Deployment
+      name: argocd-server
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests: {cpu: 50m, memory: 64Mi}
+          limits: {cpu: 300m, memory: 256Mi}
+  - target:
+      kind: Deployment
+      name: argocd-redis
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests: {cpu: 50m, memory: 32Mi}
+          limits: {cpu: 200m, memory: 128Mi}
+  - target:
+      kind: Deployment
+      name: argocd-dex-server
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests: {cpu: 20m, memory: 32Mi}
+          limits: {cpu: 100m, memory: 128Mi}
+  - target:
+      kind: Deployment
+      name: argocd-notifications-controller
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests: {cpu: 20m, memory: 32Mi}
+          limits: {cpu: 100m, memory: 128Mi}
+  - target:
+      kind: Deployment
+      name: argocd-applicationset-controller
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests: {cpu: 20m, memory: 64Mi}
+          limits: {cpu: 200m, memory: 256Mi}
 KUST
 { printf 'apiVersion: v1\nkind: Namespace\nmetadata:\n  name: argocd\n---\n'; \
   kubectl kustomize "$TMP/argocd"; } > "$TMP/argocd-manifest.yaml"
