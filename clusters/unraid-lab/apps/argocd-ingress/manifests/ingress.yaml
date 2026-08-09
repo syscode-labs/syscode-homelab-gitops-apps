@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server
+  namespace: argocd
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - argocd-unraid-lab.wind-bearded.ts.net
+  rules:
+    - host: argocd-unraid-lab.wind-bearded.ts.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
