@@ -1,4 +1,6 @@
 ingress:
+  annotations:
+    tailscale.com/proxy-class: hubble-kernel-net
   hosts:
     - host: radar-unraid-lab.wind-bearded.ts.net
       paths:

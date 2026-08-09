@@ -17,7 +17,8 @@ expose:
     hosts:
       core: harbor.wind-bearded.ts.net
     className: tailscale                         # Tailscale operator IngressClass
-    # annotations: {}                            # verify: Tailscale operator hostname annotations if needed
+    annotations:
+      tailscale.com/proxy-class: hubble-kernel-net
 
 # Admin password comes from a pre-created Secret, not committed here.
 existingSecretAdminPassword: harbor-admin-password        # key: HARBOR_ADMIN_PASSWORD

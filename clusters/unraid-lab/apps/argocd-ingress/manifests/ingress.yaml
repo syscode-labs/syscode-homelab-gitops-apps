@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: argocd-server
   namespace: argocd
+  annotations:
+    tailscale.com/proxy-class: hubble-kernel-net
 spec:
   ingressClassName: tailscale
   tls:

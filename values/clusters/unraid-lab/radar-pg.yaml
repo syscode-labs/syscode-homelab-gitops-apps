@@ -16,6 +16,8 @@ timeline:
 ingress:
   enabled: true
   className: tailscale
+  annotations:
+    tailscale.com/proxy-class: hubble-kernel-net
   hosts:
     - host: radar-pg-unraid-lab.wind-bearded.ts.net
       paths:
