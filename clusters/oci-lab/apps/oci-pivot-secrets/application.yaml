@@ -1,18 +1,19 @@
-# oci-lab-only. SecretStore for oci-pivot-controller's Bitwarden-sourced
-# secrets. Stays unhealthy until the owner delivers the Bitwarden access
-# token Secret + fills in organizationID/projectID — see
-# add-external-secrets-bitwarden (syscode-ai-internal-plans) tasks 3-4.
+# oci-lab-only. BitwardenSecret for oci-pivot-controller's Bitwarden-sourced
+# secrets, synced by the bitwarden-sm-operator chart-app. Stays unhealthy
+# until the owner delivers the bw-auth-token Secret + fills in
+# organizationId/projectId/bwSecretId — see add-external-secrets-bitwarden
+# (syscode-ai-internal-plans).
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: oci-pivot-secretstore
+  name: oci-pivot-secrets
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
     targetRevision: HEAD
-    path: clusters/oci-lab/apps/oci-pivot-secretstore/manifests
+    path: clusters/oci-lab/apps/oci-pivot-secrets/manifests
   destination:
     server: https://kubernetes.default.svc
     namespace: oci-pivot-system
