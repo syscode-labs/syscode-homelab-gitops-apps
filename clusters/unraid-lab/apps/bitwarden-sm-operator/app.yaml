@@ -1,0 +1,8 @@
+# unraid-lab-only chart-app. Bitwarden's own first-party Secrets Manager
+# operator — no sdk-server companion, no TLS setup needed. Deployed here to
+# validate the pattern end-to-end on a live cluster, decoupled from
+# oci-lab's bootstrap being blocked.
+chart: sm-operator
+repoURL: https://charts.bitwarden.com/
+version: "2.0.3"
+namespace: sm-operator-system
