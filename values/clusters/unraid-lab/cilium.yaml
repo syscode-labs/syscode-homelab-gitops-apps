@@ -1,6 +1,8 @@
 hubble:
   ui:
     ingress:
+      annotations:
+        tailscale.com/proxy-class: hubble-kernel-net
       hosts:
         - hubble-unraid-lab.wind-bearded.ts.net
       tls:

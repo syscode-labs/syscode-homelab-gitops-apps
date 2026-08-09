@@ -1,0 +1,15 @@
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: hubble-kernel-net
+spec:
+  statefulSet:
+    pod:
+      tailscaleContainer:
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        env:
+          - name: TS_USERSPACE
+            value: "false"

@@ -1,0 +1,25 @@
+# unraid-lab-only. Kernel-networking ProxyClass for the hubble-ui tailscale
+# ingress proxy — default operator proxies run TS_USERSPACE=true (no TUN),
+# which bottlenecks hubble-ui's long-lived gRPC-Web flow stream. ProxyClass
+# is cluster-scoped, not values-driven, so it's a raw manifest like
+# argocd-ingress rather than a chart-app.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hubble-proxyclass
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+    targetRevision: HEAD
+    path: clusters/unraid-lab/apps/hubble-proxyclass/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tailscale
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
