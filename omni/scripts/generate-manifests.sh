@@ -65,6 +65,20 @@ cat > "$TMP/argocd/kustomization.yaml" <<'KUST'
 namespace: argocd
 resources:
   - install.yaml
+patches:
+  # argocd-server serves TLS on its own port by default and 307-redirects
+  # any plain-HTTP request to https — including requests our own tailscale
+  # Ingress forwards as plain HTTP after terminating TLS at the tailnet
+  # edge. Without --insecure that's an infinite redirect loop
+  # (ERR_TOO_MANY_REDIRECTS). TLS is already handled by tailscale; argocd-
+  # server only needs to speak plain HTTP behind it.
+  - target:
+      kind: Deployment
+      name: argocd-server
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --insecure
 KUST
 { printf 'apiVersion: v1\nkind: Namespace\nmetadata:\n  name: argocd\n---\n'; \
   kubectl kustomize "$TMP/argocd"; } > "$TMP/argocd-manifest.yaml"
