@@ -18,23 +18,27 @@ changes automatically — no manual `kubectl apply`.
 | [cilium](apps/cilium/app.yaml) | cilium/cilium | pod networking (CNI) |
 | [radar](apps/radar/app.yaml) | skyhook-io/radar | Radar app, tailnet-private on every cluster |
 
-**`unraid-lab` only:**
+Each cluster also runs its own `app.yaml`s under `clusters/<name>/apps/`
+(not shared — set up independently per cluster, so the same app can appear
+on more than one):
+
+**`unraid-lab`:**
 
 | App | Chart / source | Role |
 | --- | --- | --- |
 | [harbor](clusters/unraid-lab/apps/harbor/) | goharbor/harbor | container registry backing the Image Factory |
 | [arc-controller](clusters/unraid-lab/apps/arc-controller/) | actions/gha-runner-scale-set-controller | GitHub Actions Runner Controller |
 | [arc-runners](clusters/unraid-lab/apps/arc-runners/) | ARC runner scale set (ApplicationSet) | self-hosted GH Actions runners, Harbor↔GHCR mirror + homelab jobs |
-| [bitwarden-sm-operator](clusters/unraid-lab/apps/bitwarden-sm-operator/) | charts.bitwarden.com/sm-operator | Bitwarden Secrets Manager operator |
+| [bitwarden-sm-operator](clusters/unraid-lab/apps/bitwarden-sm-operator/) | charts.bitwarden.com/sm-operator | Bitwarden Secrets Manager operator (also on `oci-lab`) |
 | [radar-pg](clusters/unraid-lab/apps/radar-pg/) | syscode-labs/radar-postgre | radar's Postgres backend |
 | [argocd-ingress](clusters/unraid-lab/apps/argocd-ingress/) | raw manifest | tailscale ingress for the Argo CD UI |
 | [hubble-proxyclass](clusters/unraid-lab/apps/hubble-proxyclass/) | raw manifest | kernel-network ProxyClass for the hubble-ui tailscale ingress proxy |
 
-**`oci-lab` only:**
+**`oci-lab`:**
 
 | App | Chart / source | Role |
 | --- | --- | --- |
-| [bitwarden-sm-operator](clusters/oci-lab/apps/bitwarden-sm-operator/) | charts.bitwarden.com/sm-operator | Bitwarden Secrets Manager operator |
+| [bitwarden-sm-operator](clusters/oci-lab/apps/bitwarden-sm-operator/) | charts.bitwarden.com/sm-operator | Bitwarden Secrets Manager operator (also on `unraid-lab`) |
 | [oci-pivot-controller](clusters/oci-lab/apps/oci-pivot-controller/) | ghcr.io/syscode-labs/charts | OCI free-tier node lifecycle controller |
 | [oci-pivot-secrets](clusters/oci-lab/apps/oci-pivot-secrets/) | raw manifest | `BitwardenSecret` feeding oci-pivot-controller's OCI credentials |
 
