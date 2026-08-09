@@ -1,0 +1,14 @@
+# Tailscale's own docs run this namespace privileged: proxy pods need
+# CAP_NET_ADMIN for kernel WireGuard (see hubble-proxyclass ProxyClass,
+# unraid-lab). Without this label the default/baseline PodSecurity level
+# blocks any proxy StatefulSet using TS_USERSPACE=false from ever
+# (re)scheduling — CreateNamespace=true on tailscale-operator.yaml only
+# creates the namespace, it doesn't set this label.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tailscale
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
