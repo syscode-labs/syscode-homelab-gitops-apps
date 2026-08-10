@@ -76,22 +76,6 @@ spec:
       destination:
         server: https://kubernetes.default.svc
         namespace: "{{.namespace}}"
-      # Harbor chart 1.15.1 renders empty subPath and annotations keys for its
-      # internal StatefulSets; Kubernetes omits both fields when persisting them.
-      ignoreDifferences:
-        - group: apps
-          kind: StatefulSet
-          name: harbor-database
-          jqPathExpressions:
-            - .spec.template.spec.containers[]?.volumeMounts[]?.subPath
-            - .spec.template.spec.initContainers[]?.volumeMounts[]?.subPath
-            - .spec.volumeClaimTemplates[]?.metadata.annotations
-        - group: apps
-          kind: StatefulSet
-          name: harbor-redis
-          jqPathExpressions:
-            - .spec.template.spec.containers[]?.volumeMounts[]?.subPath
-            - .spec.volumeClaimTemplates[]?.metadata.annotations
       syncPolicy:
         automated:
           prune: true
