@@ -66,6 +66,19 @@ hubble:
       enabled: true
       className: tailscale
 
+# Upstream ships the operator with no resource requests/limits — without a
+# memory limit kubelet can't cgroup-cap it, so the kernel OOM-killer has to
+# intervene reactively (exit 137) instead. Hit this alongside the same gap
+# in ArgoCD's own components during the 2026-08-09/10 unraid-lab incident.
+operator:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
 # Alloy discovers the chart's annotated Cilium and Hubble metric endpoints.
 prometheus:
   enabled: true
