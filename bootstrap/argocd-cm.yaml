@@ -10,6 +10,26 @@ metadata:
     app.kubernetes.io/name: argocd-cm
     app.kubernetes.io/part-of: argocd
 data:
+  url: https://argocd-unraid-lab.wind-bearded.ts.net
+  # PocketID SSO. Local `admin` login stays enabled (default, superuser,
+  # bypasses RBAC) as the fallback — no key needed to keep it.
+  # clientSecret comes from the argocd-pocketid-oidc Secret (populated by
+  # Bitwarden Secrets Manager); it must carry app.kubernetes.io/part-of:
+  # argocd or Argo CD won't resolve the $secretName:key reference — the
+  # argocd-oidc-secrets app's PostSync hook Job applies that label.
+  oidc.config: |
+    name: PocketID
+    issuer: https://auth.wind-bearded.ts.net
+    clientID: 486304eb-eacb-4734-8551-b4a3016fc6ee
+    clientSecret: $argocd-pocketid-oidc:clientSecret
+    requestedScopes:
+      - openid
+      - profile
+      - email
+      - groups
+    requestedIDTokenClaims:
+      groups:
+        essential: true
   # Argo CD 3 defaults to annotation tracking. Keep the established label
   # tracking during this upgrade so existing resources are not orphaned.
   application.resourceTrackingMethod: label

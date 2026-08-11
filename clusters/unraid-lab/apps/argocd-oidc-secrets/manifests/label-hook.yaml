@@ -1,0 +1,62 @@
+# Bitwarden's sm-operator has no field to set labels on the Secret it
+# generates, but Argo CD's `$secretName:key` oidc.config reference requires
+# app.kubernetes.io/part-of: argocd on that Secret. The operator patches with
+# a merge (not a full replace), so this label survives future reconciles —
+# this Job only needs to run once per Secret lifetime, and PostSync makes
+# that automatic instead of a manual kubectl step.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argocd-oidc-secret-labeler
+  namespace: argocd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argocd-oidc-secret-labeler
+  namespace: argocd
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["argocd-pocketid-oidc"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argocd-oidc-secret-labeler
+  namespace: argocd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argocd-oidc-secret-labeler
+subjects:
+  - kind: ServiceAccount
+    name: argocd-oidc-secret-labeler
+    namespace: argocd
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: label-argocd-oidc-secret
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: argocd-oidc-secret-labeler
+      restartPolicy: Never
+      containers:
+        - name: label
+          image: bitnami/kubectl:1.31.4
+          command:
+            - kubectl
+            - label
+            - secret
+            - argocd-pocketid-oidc
+            - --namespace=argocd
+            - app.kubernetes.io/part-of=argocd
+            - --overwrite

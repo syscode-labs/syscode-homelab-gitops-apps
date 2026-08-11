@@ -1,0 +1,24 @@
+# Supplies the PocketID OIDC client secret to Argo CD via Bitwarden Secrets
+# Manager, without storing the value in Git. See design.md in
+# syscode-ai-internal-plans/projects/syscode-homelab-gitops-apps/openspec/changes/argocd-pocketid-sso/
+# for why the label-hook Job exists.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-oidc-secrets
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+    targetRevision: HEAD
+    path: clusters/unraid-lab/apps/argocd-oidc-secrets/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

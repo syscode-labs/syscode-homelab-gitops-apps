@@ -22,6 +22,20 @@ metadata:
 type: Opaque
 stringData:
   token: "${BWS_ACCESS_TOKEN}"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bw-auth-token
+  namespace: argocd
+type: Opaque
+stringData:
+  token: "${BWS_ACCESS_TOKEN}"
 YAML
 
 python3 - "$temporary/manifests.yaml" "$temporary/configpatch.yaml" "$CLUSTER" <<'PY'

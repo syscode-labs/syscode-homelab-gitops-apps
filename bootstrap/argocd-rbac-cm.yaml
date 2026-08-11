@@ -1,0 +1,14 @@
+# RBAC for PocketID SSO logins. Local `admin` is a separate superuser code
+# path that bypasses this entirely, so it is unaffected by anything here.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-rbac-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  policy.default: ""
+  policy.csv: |
+    g, argocd-admins, role:admin
