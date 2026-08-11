@@ -10,10 +10,59 @@ metadata:
     app.kubernetes.io/name: argocd-cm
     app.kubernetes.io/part-of: argocd
 data:
+  # Argo CD 3 defaults to annotation tracking. Keep the established label
+  # tracking during this upgrade so existing resources are not orphaned.
+  application.resourceTrackingMethod: label
   resource.exclusions: |
+    # Keep Argo CD 3's default high-churn exclusions while preserving the
+    # pre-existing CiliumIdentity exclusion.
+    - apiGroups:
+        - ''
+        - discovery.k8s.io
+      kinds:
+        - Endpoints
+        - EndpointSlice
+    - apiGroups:
+        - coordination.k8s.io
+      kinds:
+        - Lease
+    - apiGroups:
+        - authentication.k8s.io
+        - authorization.k8s.io
+      kinds:
+        - SelfSubjectReview
+        - TokenReview
+        - LocalSubjectAccessReview
+        - SelfSubjectAccessReview
+        - SelfSubjectRulesReview
+        - SubjectAccessReview
+    - apiGroups:
+        - certificates.k8s.io
+      kinds:
+        - CertificateSigningRequest
+    - apiGroups:
+        - cert-manager.io
+      kinds:
+        - CertificateRequest
     - apiGroups:
         - cilium.io
       kinds:
         - CiliumIdentity
+        - CiliumEndpoint
+        - CiliumEndpointSlice
+    - apiGroups:
+        - kyverno.io
+        - reports.kyverno.io
+        - wgpolicyk8s.io
+      kinds:
+        - PolicyReport
+        - ClusterPolicyReport
+        - EphemeralReport
+        - ClusterEphemeralReport
+        - AdmissionReport
+        - ClusterAdmissionReport
+        - BackgroundScanReport
+        - ClusterBackgroundScanReport
+        - UpdateRequest
       clusters:
         - "*"
