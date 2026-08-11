@@ -1,0 +1,23 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: deny-etcd-metrics-outside-grafana
+spec:
+  description: Deny unauthenticated etcd metrics access from all but Grafana Alloy metrics.
+  endpointSelector:
+    matchExpressions:
+      - key: io.cilium.k8s.policy.serviceaccount
+        operator: NotIn
+        values:
+          - grafana-k8s-monitoring-alloy-metrics
+  # A targeted deny rule must not turn every selected workload into default-deny.
+  enableDefaultDeny:
+    egress: false
+  egressDeny:
+    - toEntities:
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "2381"
+          protocol: TCP

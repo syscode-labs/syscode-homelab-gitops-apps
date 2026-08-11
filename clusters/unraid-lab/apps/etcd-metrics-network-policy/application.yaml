@@ -1,0 +1,22 @@
+# The Talos etcd metrics listener is unauthenticated. Only the Grafana metrics
+# collector may initiate connections to control-plane port 2381.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: etcd-metrics-network-policy
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+    targetRevision: HEAD
+    path: clusters/unraid-lab/apps/etcd-metrics-network-policy/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
