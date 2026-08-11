@@ -82,3 +82,6 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+          # Allow a CRD-owning chart to establish its custom resource type when
+          # API discovery lags a cold-cluster bootstrap.
+          - SkipDryRunOnMissingResource=true

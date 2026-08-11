@@ -16,7 +16,7 @@ set -euo pipefail
 
 CLUSTER="${1:?usage: generate-manifests.sh <oci-lab|unraid-lab>}"
 CILIUM_VERSION="${CILIUM_VERSION:-1.17.2}"
-ARGOCD_VERSION="${ARGOCD_VERSION:-v2.14.4}"
+ARGOCD_VERSION="${ARGOCD_VERSION:-}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
@@ -25,11 +25,13 @@ case "$CLUSTER" in
     CLUSTER_TYPE="cloud"
     FILE="omni/cluster-templates/patches/oci-lab-inline-manifests.yaml"
     WITH_CILIUM=1
+    ARGOCD_VERSION="${ARGOCD_VERSION:-v2.14.4}"
     ;;
   unraid-lab)
     CLUSTER_TYPE="homelab-kvm"
     FILE="clusters/unraid-lab/omni/inline-manifests.yaml"
     WITH_CILIUM=0
+    ARGOCD_VERSION="${ARGOCD_VERSION:-v3.5.0}"
     ;;
   *)
     echo "unknown cluster '$CLUSTER' (expected oci-lab or unraid-lab)" >&2
@@ -66,6 +68,15 @@ namespace: argocd
 resources:
   - install.yaml
 patches:
+  # Argo CD 3 defaults to annotation tracking. Keep existing resources on
+  # label tracking from the first controller start so none are orphaned.
+  - target:
+      kind: ConfigMap
+      name: argocd-cm
+    patch: |-
+      - op: add
+        path: /data/application.resourceTrackingMethod
+        value: label
   # argocd-server serves TLS on its own port by default and 307-redirects
   # any plain-HTTP request to https — including requests our own tailscale
   # Ingress forwards as plain HTTP after terminating TLS at the tailnet
