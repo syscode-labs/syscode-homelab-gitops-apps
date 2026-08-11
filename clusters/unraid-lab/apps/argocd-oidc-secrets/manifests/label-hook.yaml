@@ -51,7 +51,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: label
-          image: bitnami/kubectl:1.31.4
+          image: rancher/kubectl:v1.31.14
           command:
             - kubectl
             - label
