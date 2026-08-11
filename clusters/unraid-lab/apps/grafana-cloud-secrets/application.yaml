@@ -1,0 +1,22 @@
+# Bitwarden Secrets Manager supplies Grafana Cloud credentials to Alloy without
+# storing credential values in Git.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana-cloud-secrets
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+    targetRevision: HEAD
+    path: clusters/unraid-lab/apps/grafana-cloud-secrets/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
