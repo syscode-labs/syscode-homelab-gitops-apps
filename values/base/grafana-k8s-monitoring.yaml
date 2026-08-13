@@ -62,9 +62,20 @@ collectors:
   alloy-metrics:
     presets: [clustered, statefulset]
     # Talos does not publish etcd as a Kubernetes Pod, so Grafana's etcd
-    # integration cannot discover it. Scrape the three control-plane listeners
-    # directly; access is limited by the accompanying Talos and Cilium policies.
+    # integration cannot discover it. Retain only the two disk-latency
+    # histograms from the three control-plane listeners; access is limited by
+    # the accompanying Talos and Cilium policies.
     extraConfig: |
+      prometheus.relabel "talos_etcd_disk_latency" {
+        forward_to = [prometheus.remote_write.grafana_cloud_metrics.receiver]
+
+        rule {
+          action        = "keep"
+          source_labels = ["__name__"]
+          regex         = "etcd_disk_(wal_fsync|backend_commit)_duration_seconds(_bucket|_sum|_count)"
+        }
+      }
+
       prometheus.scrape "talos_etcd" {
         targets = [
           { "__address__" = "192.168.122.109:2381", "instance" = "unraid-lab-control-planes-gwvq7k", "job" = "integrations/etcd" },
@@ -74,7 +85,7 @@ collectors:
         scrape_interval = "60s"
         scrape_timeout = "10s"
         scrape_protocols = ["OpenMetricsText1.0.0", "OpenMetricsText0.0.1", "PrometheusText0.0.4"]
-        forward_to = [prometheus.remote_write.grafana_cloud_metrics.receiver]
+        forward_to = [prometheus.relabel.talos_etcd_disk_latency.receiver]
       }
   alloy-singleton:
     presets: [singleton]
