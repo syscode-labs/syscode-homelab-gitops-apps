@@ -1,6 +1,9 @@
 # Auto-updated by talos-images workflow — do not edit manually
 talos_version: v1.14.0-beta.1
-kubernetes_version: v1.37.0-beta.0
+kubernetes_version: v1.36.3
+default_kubernetes_version: v1.37.0-beta.0
 schematic_id: 376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
-oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaaaudfpvmwjqc2jeoxkhtrq6mxjdvvkkeui4w4abijyndk53kyzzhq
-updated_at: 2026-08-13T21:03:59Z
+oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaaadpxdn4oploadtjr2exmwzawv4rvqavqxfowha3wu3qk7yti6m3a
+firecracker_extension_version: talos-ext-firecracker-v1.12.0
+imp_guest_kernel_extension_version: v1.1.1
+updated_at: 2026-08-22T20:43:51Z
