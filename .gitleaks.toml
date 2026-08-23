@@ -8,5 +8,6 @@ useDefault = true
 description = "generated Talos inline manifests"
 paths = [
   '''omni\/patches\/.*-inline-manifests\.yaml''',
+  '''omni\/cluster-templates\/patches\/.*-inline-manifests\.yaml''',
   '''clusters\/.*\/omni\/inline-manifests\.yaml''',
 ]

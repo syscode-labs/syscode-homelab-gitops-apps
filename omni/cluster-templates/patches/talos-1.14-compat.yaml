@@ -1,0 +1,11 @@
+apiVersion: v1alpha1
+kind: SecurityProfileConfig
+workloadIsolation: false
+---
+apiVersion: v1alpha1
+kind: CRICustomizationConfig
+name: disable-nri
+content: |
+  [plugins]
+    [plugins."io.containerd.nri.v1.nri"]
+      disable = true

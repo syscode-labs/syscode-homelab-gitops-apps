@@ -1,5 +1,5 @@
 # The Talos etcd metrics listener is unauthenticated. Only the Grafana metrics
-# collector may initiate connections to control-plane port 2381.
+# collector may initiate connections to control-plane port 2383.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

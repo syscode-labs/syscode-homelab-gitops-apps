@@ -32,7 +32,7 @@ jobs:
           curl -sfL "https://github.com/gitleaks/gitleaks/releases/download/${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION#v}_linux_x64.tar.gz" \
             | tar -xz -C /usr/local/bin gitleaks
       - name: Detect secrets
-        run: gitleaks detect --source . --redact
+        run: gitleaks detect --config .gitleaks.toml --source . --redact
 
   validate:
     name: Manifest validation
