@@ -19,5 +19,5 @@ spec:
         - remote-node
       toPorts:
         - ports:
-            - port: "2381"
+            - port: "2383"
           protocol: TCP

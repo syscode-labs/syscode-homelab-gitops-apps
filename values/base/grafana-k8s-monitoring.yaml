@@ -78,9 +78,9 @@ collectors:
 
       prometheus.scrape "talos_etcd" {
         targets = [
-          { "__address__" = "192.168.122.109:2381", "instance" = "unraid-lab-control-planes-gwvq7k", "job" = "integrations/etcd" },
-          { "__address__" = "192.168.122.190:2381", "instance" = "unraid-lab-control-planes-hqf6vh", "job" = "integrations/etcd" },
-          { "__address__" = "192.168.122.214:2381", "instance" = "unraid-lab-control-planes-htvzs7", "job" = "integrations/etcd" },
+          { "__address__" = "192.168.122.109:2383", "instance" = "unraid-lab-control-planes-gwvq7k", "job" = "integrations/etcd" },
+          { "__address__" = "192.168.122.190:2383", "instance" = "unraid-lab-control-planes-hqf6vh", "job" = "integrations/etcd" },
+          { "__address__" = "192.168.122.214:2383", "instance" = "unraid-lab-control-planes-htvzs7", "job" = "integrations/etcd" },
         ]
         scrape_interval = "60s"
         scrape_timeout = "10s"
