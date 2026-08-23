@@ -3,6 +3,6 @@ talos_version: v1.14.0-beta.1
 kubernetes_version: v1.36.3
 default_kubernetes_version: v1.37.0-beta.0
 schematic_id: 376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
-oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaa722hvij5w7tprjwhjq6mbpsvrxomwaicd24534y5c457c5y6pwha
+oci_image_ocid: ocid1.image.oc1.uk-london-1.aaaaaaaamj7qbeajeas3nkf6b3s72ey6p5bzqqzjv46orv2q2hqrhlimb63q
 firecracker_extension_version: talos-ext-firecracker-v1.13.0
-updated_at: 2026-08-22T22:32:02Z
+updated_at: 2026-08-23T00:27:13Z
