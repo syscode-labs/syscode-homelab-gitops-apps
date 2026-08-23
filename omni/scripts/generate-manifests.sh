@@ -74,9 +74,12 @@ patches:
       kind: ConfigMap
       name: argocd-cm
     patch: |-
-      - op: add
-        path: /data/application.resourceTrackingMethod
-        value: label
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: argocd-cm
+      data:
+        application.resourceTrackingMethod: label
   # argocd-server serves TLS on its own port by default and 307-redirects
   # any plain-HTTP request to https — including requests our own tailscale
   # Ingress forwards as plain HTTP after terminating TLS at the tailnet

@@ -4,19 +4,20 @@ labels:
   environment: oci
 kubernetes:
   # Not touched by the talos-images upgrade workflow — bump deliberately, one
-  # minor at a time. v1.37.0-beta.0 is Talos 1.14.0-beta.1's own
+  # minor at a time. v1.37.0-rc.0 is Talos 1.14.0-rc.1's own
   # DefaultKubernetesVersion (same value unraid-lab's canary uses), not an
   # inherited/mismatched pin — matches the Talos version below on purpose.
   version: v1.36.3
 talos:
   # Keep in step with installImage in omni/machine-classes/*.yaml.
-  version: v1.14.0-beta.1
+  version: v1.14.0-rc.1
 # Patches live in the sibling patches/ directory, so paths no longer traverse
 # upward and no `--allowed-dir` flag is needed. `status` now works without it.
 patches:
   - file: patches/cni-none.yaml
   - file: patches/disable-kube-proxy.yaml
   - file: patches/allow-scheduling.yaml
+  - file: patches/talos-1.14-compat.yaml
   - file: patches/oci-lab-inline-manifests.yaml
 ---
 # omnictl requires ControlPlane and Workers as SEPARATE documents. They were
