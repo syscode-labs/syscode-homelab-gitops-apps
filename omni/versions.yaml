@@ -12,16 +12,14 @@
 # overrides `talos` without `kubernetes` derives its Kubernetes version from
 # the supported versions of its own Talos target, not from the global pin.
 
-talos: v1.14.0-beta.1
+talos: v1.13.9
 kubernetes: v1.36.3
 
 clusters:
-  # unraid-lab piloted 1.14 first (openspec: automate-talos-upgrade-pipeline,
-  # task 8.3); the global pin has since caught up to match. Kept as an
-  # explicit override, not removed, so this stays true even if the global
-  # pin moves again independently.
+  # Kept as an explicit override so this stays true even if the global pin
+  # moves again independently.
   unraid-lab:
-    talos: v1.14.0-beta.1
+    talos: v1.13.9
     kubernetes: v1.36.3
 
   # Never successfully bootstrapped — no live state to protect, no backup
