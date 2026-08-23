@@ -5,3 +5,6 @@ omni/secrets.env
 # A literal $HOME can be created by misconfigured CLI environments; it may
 # contain local credentials and must never be staged.
 /$HOME/
+
+# Local isolated agent worktrees.
+/.worktrees/
