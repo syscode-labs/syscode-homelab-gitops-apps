@@ -12,3 +12,11 @@ kvm:
   preflight:
     enabled: true
     minVerifiedNodes: 3
+
+# Grafana Kubernetes Monitoring scrapes the endpoints directly; this cluster
+# does not install Prometheus Operator CRDs.
+metrics:
+  serviceMonitor:
+    enabled: false
+  podMonitor:
+    enabled: false
