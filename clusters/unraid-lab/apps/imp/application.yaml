@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: imp
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/syscode-labs/imp.git
+      targetRevision: 7e81cfdc7968b993ebdc0f94f77b2dc3ef12d419 # v0.6.0
+      path: charts/imp
+      helm:
+        releaseName: imp
+        valueFiles:
+          - $values/values/clusters/unraid-lab/imp.yaml
+    - repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: imp-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

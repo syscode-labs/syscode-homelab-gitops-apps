@@ -1,0 +1,14 @@
+operator:
+  image:
+    repository: ghcr.io/syscode-labs/imp-operator@sha256:191c0093b387ce7e3f323e3b21c15de1b8f61464db63a586253c0893763b14aa
+
+agent:
+  image:
+    repository: ghcr.io/syscode-labs/imp-agent@sha256:cdcbd5dc52c7d61e9e6a34aed0f0dff53fa5b1d883b15127b6b3e00ca6e990e3
+  env:
+    kernelPath: /usr/local/share/imp/vmlinux
+
+kvm:
+  preflight:
+    enabled: true
+    minVerifiedNodes: 3
