@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: imp-crds
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/syscode-labs/imp.git
+    targetRevision: f0c11704a101aaf97ed6ce61f0298942548674a5 # v0.6.1
+    path: config/crd/bases
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: imp-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
