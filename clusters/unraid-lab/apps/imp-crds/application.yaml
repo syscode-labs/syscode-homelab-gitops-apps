@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/syscode-labs/imp.git
-    targetRevision: 7e81cfdc7968b993ebdc0f94f77b2dc3ef12d419 # v0.6.0
+    targetRevision: f0c11704a101aaf97ed6ce61f0298942548674a5 # v0.6.1
     path: config/crd/bases
   destination:
     server: https://kubernetes.default.svc
