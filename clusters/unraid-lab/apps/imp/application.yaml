@@ -12,7 +12,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/syscode-labs/imp.git
-      targetRevision: f0c11704a101aaf97ed6ce61f0298942548674a5 # v0.6.1
+      targetRevision: 0d60d171bba6a04dd5891e12c294283b183b053d # v0.6.2
       path: charts/imp
       helm:
         releaseName: imp
