@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/syscode-labs/imp.git
-    targetRevision: f0c11704a101aaf97ed6ce61f0298942548674a5 # v0.6.1
+    targetRevision: 906bf04c7fc5ed10c9067293206af2aee6feea72 # VTEP guardrail canary (adds spec.vtepIP)
     path: config/crd/bases
   destination:
     server: https://kubernetes.default.svc
