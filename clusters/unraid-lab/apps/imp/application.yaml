@@ -12,7 +12,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/syscode-labs/imp.git
-      targetRevision: 0d60d171bba6a04dd5891e12c294283b183b053d # v0.6.2
+      targetRevision: fix/talos-extension-host-paths # VTEP guardrail
       path: charts/imp
       helm:
         releaseName: imp
