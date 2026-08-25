@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/syscode-labs/imp.git
-    targetRevision: v0.6.3 # released
+    targetRevision: v0.7.0 # HA operator
     path: config/crd/bases
   destination:
     server: https://kubernetes.default.svc
