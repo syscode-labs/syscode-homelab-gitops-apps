@@ -12,7 +12,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/syscode-labs/imp.git
-      targetRevision: 3cdc5034aa54ecdeba8369545ed68910bf1ac84e # development lease IPAM canary
+      targetRevision: fix/talos-extension-host-paths # VTEP guardrail
       path: charts/imp
       helm:
         releaseName: imp
