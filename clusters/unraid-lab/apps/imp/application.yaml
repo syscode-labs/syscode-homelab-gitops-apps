@@ -12,7 +12,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/syscode-labs/imp.git
-      targetRevision: e75941d5dd648f7e5056e120d59934b47e387ee2 # development runtime canary
+      targetRevision: 3cdc5034aa54ecdeba8369545ed68910bf1ac84e # development lease IPAM canary
       path: charts/imp
       helm:
         releaseName: imp
