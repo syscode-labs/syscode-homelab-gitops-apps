@@ -12,6 +12,9 @@ metadata:
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
+    # Argo's structured-merge diff cannot decode Kubernetes 1.36 Deployment
+    # status. Use the supported server-side dry-run diff for this application.
+    argocd.argoproj.io/compare-options: ServerSideDiff=true
 spec:
   project: default
   sources:
