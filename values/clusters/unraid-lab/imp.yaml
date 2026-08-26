@@ -1,16 +1,16 @@
 operator:
   image:
-    repository: ghcr.io/syscode-labs/imp-operator@sha256:a3e5aa78097864cac825cd2315f26b6dbd8a0ea9eafa588cf7dcbdb39e0f8d73
+    repository: ghcr.io/syscode-labs/imp-operator@sha256:c8a382d25393adab23baa52b3bb0680274c9124379ae16f6ac16242ede81c590
 
 agent:
   image:
-    repository: ghcr.io/syscode-labs/imp-agent@sha256:8abb84f4d728e852766579b8b98fbd14ad540b1de9743beb2375f652bbf6f897
+    repository: ghcr.io/syscode-labs/imp-agent@sha256:42440fb4b4a3a34967ef36cae7a0fc2c33f18104fe8e061b44003f3813e7f9b3
   env:
     kernelPath: /usr/local/share/imp/vmlinux
 
 runtime:
   image:
-    repository: ghcr.io/syscode-labs/imp-agent@sha256:8abb84f4d728e852766579b8b98fbd14ad540b1de9743beb2375f652bbf6f897
+    repository: ghcr.io/syscode-labs/imp-agent@sha256:42440fb4b4a3a34967ef36cae7a0fc2c33f18104fe8e061b44003f3813e7f9b3
 
 kvm:
   preflight:
@@ -24,3 +24,8 @@ metrics:
     enabled: false
   podMonitor:
     enabled: false
+
+# Opt-in pressure lifecycle stays disabled until evaluated (openspec:
+# memory-pressure-guardrails).
+pressureLifecycle:
+  enabled: false
