@@ -1,5 +1,10 @@
 extends: default
 
+# Vendored third-party charts keep upstream style; local pre-commit already
+# excludes them — keep CI consistent.
+ignore: |
+  vendor/
+
 rules:
   line-length:
     max: 120
