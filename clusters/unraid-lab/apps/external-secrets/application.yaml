@@ -2,6 +2,9 @@
 # Single ClusterSecretStore "bitwarden" authenticates from one bootstrap
 # token (SOPS-encrypted in syscod3/homelab-secrets). See openspec change
 # eso-bitwarden-unraid-lab.
+# Chart is vendored (vendor/external-secrets) — the public helm repo host is
+# not reliably resolvable from this cluster's egress, and vendoring pins the
+# exact sdk-server v0.6.0 dependency.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -12,9 +15,9 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://charts.external-secrets.co
-      chart: external-secrets
-      targetRevision: 2.9.0 # bundles bitwarden-sdk-server v0.6.0 (mem-leak fix)
+    - repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+      targetRevision: HEAD
+      path: vendor/external-secrets
       helm:
         releaseName: external-secrets
         valueFiles:
