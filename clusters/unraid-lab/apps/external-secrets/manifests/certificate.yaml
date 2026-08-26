@@ -1,0 +1,21 @@
+# Server certificate for bitwarden-sdk-server. The chart mounts secret
+# `bitwarden-tls-certs` (tls.crt/tls.key/ca.crt) at its default paths.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bitwarden-sdk-server
+  namespace: external-secrets
+spec:
+  secretName: bitwarden-tls-certs
+  dnsNames:
+    - bitwarden-sdk-server.external-secrets.svc.cluster.local
+    - localhost
+  ipAddresses:
+    - 127.0.0.1
+  issuerRef:
+    name: eso-selfsigned
+    kind: Issuer
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS8
+    size: 2048

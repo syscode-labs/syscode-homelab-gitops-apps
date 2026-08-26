@@ -1,0 +1,8 @@
+# ESO chart values for unraid-lab. sdk-server serves HTTPS only; the serving
+# certificate is provisioned by cert-manager (manifests/certificate.yaml)
+# into the secret this subchart mounts by default.
+bitwarden-sdk-server:
+  enabled: true
+
+serviceMonitor:
+  enabled: false # no Prometheus Operator CRDs on this cluster
