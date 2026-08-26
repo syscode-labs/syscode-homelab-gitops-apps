@@ -84,3 +84,20 @@ Apply the omni-on-unraid reconfig (points Image Factory at Harbor, drops the
 sign-off.
 
 Detail: `syscode-ai-internal-plans/projects/image-factory-registry/handoffs/2026-07-20-omni-image-factory-reconfig.md`.
+
+## Secrets bootstrap (unraid-lab, ESO + Bitwarden)
+
+DR order for the secrets pipeline: Argo installs ESO + `bitwarden-sdk-server`
+(app `external-secrets`); cert-manager issues the sdk-server serving cert.
+The single provider token is SOPS-encrypted in the private repo
+`syscod3/homelab-secrets` at `unraid-lab/bws-token.enc.yaml`. Restore it once
+with:
+
+```sh
+sops -d /path/to/homelab-secrets/unraid-lab/bws-token.enc.yaml | \
+  kubectl --context omni-unraid-lab apply -f -
+```
+
+Everything else (grafana-cloud, argocd-pocketid-oidc) then syncs via
+ExternalSecrets against ClusterSecretStore `bitwarden`. Never create
+per-namespace provider tokens; never paste the token into any agent session.
