@@ -57,6 +57,24 @@ argocd_path.write_text(argocd_manifest)
 print("Argo CD manifest: valid")
 PY
 
+# Tailscale terminates TLS before forwarding to argocd-server:80. Confirm the
+# generated bootstrap disables Argo's own HTTP-to-HTTPS redirect before apply.
+python3 - "$temporary/argocd.yaml" <<'PY'
+import sys
+
+import yaml
+
+for manifest in yaml.safe_load_all(open(sys.argv[1])):
+    if manifest and manifest.get("kind") == "Deployment" and manifest["metadata"]["name"] == "argocd-server":
+        containers = manifest["spec"]["template"]["spec"]["containers"]
+        args = next(container.get("args", []) for container in containers if container["name"] == "argocd-server")
+        if "--insecure" in args:
+            print("Argo CD TLS-termination setting: valid")
+            break
+else:
+    raise SystemExit("argocd-server is missing --insecure; refusing to deploy a redirect loop")
+PY
+
 if [[ "${1:-}" == "--apply" ]]; then
   omnictl get "ConfigPatches.omni.sidero.dev" "$PATCH_ID" -n default -o json \
     >"$temporary/existing-configpatch.json"
@@ -81,6 +99,13 @@ PY
   omnictl kubeconfig "$temporary/kubeconfig" --cluster "$CLUSTER" --merge=false --force
   KUBECONFIG="$temporary/kubeconfig" kubectl apply --server-side --force-conflicts \
     -f "$temporary/argocd.yaml"
+  KUBECONFIG="$temporary/kubeconfig" kubectl rollout status deployment/argocd-server \
+    -n argocd --timeout=5m
+  [[ "$(curl -ksS -o /dev/null -w '%{http_code}' --max-redirs 0 \
+    https://argocd-unraid-lab.wind-bearded.ts.net)" == "200" ]] || {
+    printf 'Argo CD did not become reachable without a redirect after rollout.\n' >&2
+    exit 1
+  }
   printf 'Argo CD upgraded from the generated manifest.\n'
 else
   printf 'Inline-manifest ConfigPatch and Argo CD manifest rendered and validated; re-run with --apply to deploy.\n'
