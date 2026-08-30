@@ -5,10 +5,15 @@ set -euo pipefail
 CLUSTER="unraid-lab"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 MANIFESTS="$REPO_ROOT/clusters/$CLUSTER/omni/inline-manifests.yaml"
+ARGOCD_CONFIG="$REPO_ROOT/bootstrap/argocd-cm.yaml"
 PATCH_ID="202-cluster-$CLUSTER-omni/patches/inline-manifests.yaml"
 
 [[ -f "$MANIFESTS" ]] || {
   printf 'missing %s\n' "$MANIFESTS" >&2
+  exit 1
+}
+[[ -f "$ARGOCD_CONFIG" ]] || {
+  printf 'missing %s\n' "$ARGOCD_CONFIG" >&2
   exit 1
 }
 
@@ -99,6 +104,8 @@ PY
   omnictl kubeconfig "$temporary/kubeconfig" --cluster "$CLUSTER" --merge=false --force
   KUBECONFIG="$temporary/kubeconfig" kubectl apply --server-side --force-conflicts \
     -f "$temporary/argocd.yaml"
+  KUBECONFIG="$temporary/kubeconfig" kubectl apply --server-side --force-conflicts \
+    -f "$ARGOCD_CONFIG"
   KUBECONFIG="$temporary/kubeconfig" kubectl rollout status deployment/argocd-server \
     -n argocd --timeout=5m
   [[ "$(curl -ksS -o /dev/null -w '%{http_code}' --max-redirs 0 \
