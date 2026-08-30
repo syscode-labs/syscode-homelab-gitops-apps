@@ -16,8 +16,10 @@ talos:
 patches:
   - file: patches/cni-none.yaml
   - file: patches/disable-kube-proxy.yaml
-  - file: patches/allow-scheduling.yaml
-  - file: patches/talos-1.14-compat.yaml
+  # allow-scheduling.yaml deliberately NOT applied: oci-lab's control plane
+  # stays dedicated (only the worker takes workloads).
+  # talos-1.14-compat.yaml contains SecurityProfileConfig, which Talos 1.13
+  # does not register. Add it only when versions.yaml moves oci-lab to 1.14.
   - file: patches/oci-lab-inline-manifests.yaml
 ---
 # omnictl requires ControlPlane and Workers as SEPARATE documents. They were

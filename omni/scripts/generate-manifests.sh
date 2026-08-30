@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 # Fill the generated blocks of a cluster's Talos inline-manifests:
-#   argocd       raw Argo CD install manifest (upstream install.yaml)
-#   argocd-apps  the repo-root appset.yaml with THIS cluster's identity substituted
-#   cilium       rendered Cilium (only clusters that bootstrap their own CNI, e.g. OCI)
+#   unraid-lab   argocd       raw Argo CD install manifest (upstream install.yaml)
+#                argocd-apps  appset.yaml — the layering ApplicationSet, embedded
+#                             verbatim (it covers BOTH clusters; oci-lab apps are
+#                             reconciled remotely through the registered cluster)
+#   oci-lab      cilium       rendered Cilium — oci-lab bootstraps Cilium ONLY,
+#                             no local Argo CD (unraid-lab's Argo reconciles it
+#                             through the registered external cluster)
 #
-# The static blocks (argocd-bootstrap, argocd-unraid-raw) and every comment are
-# left untouched — yq edits only the named blocks in place.
+# The static blocks (oci-lab's argocd-manager RBAC, unraid's argocd-bootstrap /
+# argocd-unraid-raw) and every comment are left untouched — yq edits only the
+# named blocks in place.
 #
 # Usage:  omni/scripts/generate-manifests.sh <oci-lab|unraid-lab>
 #   or:   mise run oci-lab:generate-manifests   /   mise run unraid:generate-manifests
 #
-# Requirements: yq (mikefarah v4), curl, helm, kubectl. Run after Cilium/Argo CD version
-# bumps or appset.yaml changes, then review + commit the result.
+# Requirements: yq (mikefarah v4), curl, helm, kubectl. Run after Cilium/Argo CD
+# version bumps or appset.yaml changes, then review + commit the result.
 set -euo pipefail
 
 CLUSTER="${1:?usage: generate-manifests.sh <oci-lab|unraid-lab>}"
@@ -22,14 +27,13 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 case "$CLUSTER" in
   oci-lab)
-    CLUSTER_TYPE="cloud"
     FILE="omni/cluster-templates/patches/oci-lab-inline-manifests.yaml"
+    WITH_ARGOCD=0
     WITH_CILIUM=1
-    ARGOCD_VERSION="${ARGOCD_VERSION:-v2.14.4}"
     ;;
   unraid-lab)
-    CLUSTER_TYPE="homelab-kvm"
     FILE="clusters/unraid-lab/omni/inline-manifests.yaml"
+    WITH_ARGOCD=1
     WITH_CILIUM=0
     ARGOCD_VERSION="${ARGOCD_VERSION:-v3.5.0}"
     ;;
@@ -54,16 +58,17 @@ inject() {
   ' "$FILE"
 }
 
-echo "==> Argo CD ${ARGOCD_VERSION} install manifest (namespaced to argocd)..."
-# Upstream install.yaml carries NO namespace on its resources — it relies on
-# `kubectl apply -n argocd`. Talos applies inline manifests verbatim with no
-# namespace default, so the namespaced resources would miss the argocd namespace
-# and never install. Stamp it with kustomize (also fixes the RBAC binding
-# subjects), and prepend the Namespace since kustomize won't create it.
-mkdir -p "$TMP/argocd"
-curl -sfL "https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml" \
-  -o "$TMP/argocd/install.yaml"
-cat > "$TMP/argocd/kustomization.yaml" <<'KUST'
+if [[ "$WITH_ARGOCD" == 1 ]]; then
+  echo "==> Argo CD ${ARGOCD_VERSION} install manifest (namespaced to argocd)..."
+  # Upstream install.yaml carries NO namespace on its resources — it relies on
+  # `kubectl apply -n argocd`. Talos applies inline manifests verbatim with no
+  # namespace default, so the namespaced resources would miss the argocd namespace
+  # and never install. Stamp it with kustomize (also fixes the RBAC binding
+  # subjects), and prepend the Namespace since kustomize won't create it.
+  mkdir -p "$TMP/argocd"
+  curl -sfL "https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml" \
+    -o "$TMP/argocd/install.yaml"
+  cat > "$TMP/argocd/kustomization.yaml" <<'KUST'
 namespace: argocd
 resources:
   - install.yaml
@@ -164,14 +169,14 @@ patches:
           requests: {cpu: 20m, memory: 64Mi}
           limits: {cpu: 200m, memory: 256Mi}
 KUST
-{ printf 'apiVersion: v1\nkind: Namespace\nmetadata:\n  name: argocd\n---\n'; \
-  kubectl kustomize "$TMP/argocd"; } > "$TMP/argocd-manifest.yaml"
-inject argocd "$TMP/argocd-manifest.yaml"
+  { printf 'apiVersion: v1\nkind: Namespace\nmetadata:\n  name: argocd\n---\n'; \
+    kubectl kustomize "$TMP/argocd"; } > "$TMP/argocd-manifest.yaml"
+  inject argocd "$TMP/argocd-manifest.yaml"
 
-echo "==> appset.yaml for ${CLUSTER} / ${CLUSTER_TYPE}..."
-sed -e "s/CLUSTER_NAME/${CLUSTER}/g" -e "s/CLUSTER_TYPE/${CLUSTER_TYPE}/g" \
-  "$REPO_ROOT/appset.yaml" > "$TMP/appset.yaml"
-inject argocd-apps "$TMP/appset.yaml"
+  echo "==> appset.yaml (single ApplicationSet covering unraid-lab + oci-lab)..."
+  cp "$REPO_ROOT/appset.yaml" "$TMP/appset.yaml"
+  inject argocd-apps "$TMP/appset.yaml"
+fi
 
 if [[ "$WITH_CILIUM" == 1 ]]; then
   echo "==> Cilium ${CILIUM_VERSION} (kube-proxy-free, KubePrism)..."
@@ -184,10 +189,11 @@ if [[ "$WITH_CILIUM" == 1 ]]; then
     --set k8sServiceHost=localhost \
     --set k8sServicePort=7445 \
     --set ipam.mode=kubernetes \
+    --set securityContext.privileged=true \
     --set hubble.relay.enabled=true \
     --set hubble.ui.enabled=true \
     > "$TMP/cilium.yaml"
   inject cilium "$TMP/cilium.yaml"
 fi
 
-echo "==> Wrote ${FILE#"$REPO_ROOT"/} (${CLUSTER} / ${CLUSTER_TYPE}). Review + commit."
+echo "==> Wrote ${FILE#"$REPO_ROOT"/} (${CLUSTER}). Review + commit."

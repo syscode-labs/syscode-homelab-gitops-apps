@@ -17,8 +17,9 @@ if the tailnet domain changes.
 
 ## 2. Generate inline-manifests, commit
 
-Fills each cluster's `argocd` (install), `argocd-apps` (appset with that
-cluster's identity), and — OCI only — `cilium` block:
+unraid-lab (installs Argo CD + the layering ApplicationSet, which also covers
+`oci-lab`); OCI gets a Cilium-only patch plus the `argocd-manager` service
+account — no Argo CD on OCI:
 
 ```bash
 mise run oci-lab:generate-manifests
@@ -32,13 +33,21 @@ Version pins live in `omni/scripts/generate-manifests.sh` (`ARGOCD_VERSION`,
 
 ## 3. Bootstrap the clusters (Omni)
 
-Apply the Talos machine config with the generated patch through Omni. On first
-control-plane boot Talos applies the inline-manifests: Argo CD installs, then the
-seeded root Applications pull the rest of this repo:
+Apply the Talos machine config with the generated patch through Omni.
 
-- `argocd-apps` — the layering ApplicationSet (chart-apps, values `base → type → cluster`).
+**unraid-lab**: on first control-plane boot Talos applies the
+inline-manifests: Argo CD installs, then the seeded root Applications pull the
+rest of this repo:
+
+- `argocd-apps` — the layering ApplicationSet (chart-apps; unraid-lab AND
+  oci-lab destinations).
 - `argocd-bootstrap` — syncs `bootstrap/` (Tailscale operator).
-- `argocd-unraid-raw` (unraid only) — syncs `clusters/unraid-lab/apps/*/application.yaml` (arc-runners).
+- `argocd-unraid-raw` — syncs `clusters/unraid-lab/apps/*/application.yaml`
+  (arc-runners, plus the oci-* lanes below).
+
+**oci-lab**: first control-plane boot applies only Cilium + the
+`argocd-manager` ServiceAccount/ClusterRole/Binding. There is no Argo CD on
+oci-lab; unraid-lab's Argo reconciles it once registered (step 4b).
 
 ## 4. Create in-cluster secrets
 
@@ -50,6 +59,28 @@ Harbor being up (step 7) — create it there, not here.
   (`github_app_id`, `github_app_installation_id`, `github_app_private_key`).
 
 Generate the App private key yourself; never commit any of these.
+
+## 4b. Register oci-lab with unraid-lab's Argo CD
+
+After the oci-lab cluster is up and reachable over the private path
+(`unraid-lab → tailnet → wrt-london → IPSec → vpn-subnet nodeIP:6443`):
+
+1. Grab the kube CA + build the API URL from the oci-talos-cp-1 VPN-subnet IP
+   (`kubectl config view --raw` on an admin kubeconfig, or
+   `omnictl cluster kubeconfig`).
+2. Mint a long-lived token for `argocd-manager` (kube-system): create a Secret
+   of type `kubernetes.io/service-account-token` annotated
+   `kubernetes.io/service-account.name: argocd-manager`, read `token`.
+3. Store `server` (the `https://<ip>:6443` URL), `ca` (base64 CA), and
+   `token` in Bitwarden; put the entry's UUID into
+   `clusters/unraid-lab/apps/oci-cluster-registration/manifests/external-secret.yaml`
+   (replaces the placeholder keys) and commit.
+4. ESO materializes Secret `oci-lab-cluster` in unraid's argocd ns; the
+   `argocd.argoproj.io/secret-type: cluster` label registers the cluster.
+   The `apps` ApplicationSet, `oci-raw`, and `oci-bootstrap` then sync against
+   it (they sit degraded until this step).
+
+Never commit the token or CA; they travel only through Bitwarden.
 
 ## 5. Pre-merge gate
 
