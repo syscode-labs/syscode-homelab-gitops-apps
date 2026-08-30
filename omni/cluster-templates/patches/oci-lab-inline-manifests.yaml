@@ -58,3 +58,33 @@ cluster:
           # Keep it scoped to the same role as the direct service-account path.
           - kind: Group
             name: argocd-oci
+        ---
+        # cert-manager's signer RBAC requires explicit approve/sign on
+        # signers subresources; argocd-manager's wildcard does not satisfy
+        # kubectl auth reconcile's strict check.
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRole
+        metadata:
+          name: argocd-oci-signer-approve
+        rules:
+          - apiGroups: ["cert-manager.io"]
+            resources: ["signers"]
+            resourceNames: ["clusterissuers.cert-manager.io/*", "issuers.cert-manager.io/*"]
+            verbs: ["approve"]
+          - apiGroups: ["certificates.k8s.io"]
+            resources: ["signers"]
+            resourceNames: ["clusterissuers.cert-manager.io/*", "issuers.cert-manager.io/*"]
+            verbs: ["sign"]
+        ---
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: argocd-oci-signer-approve
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: argocd-oci-signer-approve
+        subjects:
+          - kind: Group
+            name: argocd-oci
+            apiGroup: rbac.authorization.k8s.io
