@@ -49,6 +49,7 @@ data:
   # Argo CD 3 defaults to annotation tracking. Keep the established label
   # tracking during this upgrade so existing resources are not orphaned.
   application.resourceTrackingMethod: label
+  resource.customLabels: syscode.io/cluster
   resource.exclusions: |
     # Keep Argo CD 3's default high-churn exclusions while preserving the
     # pre-existing CiliumIdentity exclusion.
