@@ -8,8 +8,10 @@
 > [docs/architecture/gitops-layering.md](docs/architecture/gitops-layering.md#current-state--todo).
 
 The apps running on the Syscode homelab Kubernetes clusters, and their config.
-Argo CD (self-managed, one instance per cluster) watches this repo and applies
-changes automatically — no manual `kubectl apply`.
+Argo CD (self-managed, hosted in `unraid-lab`) watches this repo and applies
+changes automatically — no manual `kubectl apply`. It also reconciles
+`oci-lab` remotely through a registered external cluster; `oci-lab` runs no
+Argo CD of its own.
 
 ## Apps
 

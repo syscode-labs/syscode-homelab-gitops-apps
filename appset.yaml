@@ -1,9 +1,11 @@
 # Layering ApplicationSet — the "chart-app" engine.
 #
-# SEEDED PER CLUSTER by the Talos inline manifests. The two `list` elements below
-# (clusterName / clusterType) are the ONLY per-cluster difference — each cluster's
-# inline manifest embeds this file with its own identity. This copy is the
-# canonical reference; the identities here are placeholders.
+# ONE instance, hosted in unraid-lab's Argo CD (embedded via unraid-lab's Talos
+# inline manifests). It covers BOTH clusters: oci-lab is reconciled remotely
+# through the registered external cluster — oci-lab deliberately runs no local
+# Argo CD. Application destinations differ per element (see the conditional in
+# `destination` below): in-cluster server for unraid-lab, registered cluster
+# name `oci-lab` for OCI.
 #
 # Selection (which apps run): three git generators —
 #   apps/*/app.yaml                        shared (every cluster)
@@ -26,8 +28,14 @@ spec:
         generators:
           - list:
               elements:
-                - clusterName: CLUSTER_NAME
-                  clusterType: CLUSTER_TYPE
+                - clusterName: unraid-lab
+                  clusterType: homelab-kvm
+                  destinationName: ""
+                  destinationServer: https://kubernetes.default.svc
+                - clusterName: oci-lab
+                  clusterType: cloud
+                  destinationName: oci-lab
+                  destinationServer: ""
           - git:
               repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
               revision: HEAD
@@ -37,8 +45,14 @@ spec:
         generators:
           - list:
               elements:
-                - clusterName: CLUSTER_NAME
-                  clusterType: CLUSTER_TYPE
+                - clusterName: unraid-lab
+                  clusterType: homelab-kvm
+                  destinationName: ""
+                  destinationServer: https://kubernetes.default.svc
+                - clusterName: oci-lab
+                  clusterType: cloud
+                  destinationName: oci-lab
+                  destinationServer: ""
           - git:
               repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
               revision: HEAD
@@ -48,8 +62,14 @@ spec:
         generators:
           - list:
               elements:
-                - clusterName: CLUSTER_NAME
-                  clusterType: CLUSTER_TYPE
+                - clusterName: unraid-lab
+                  clusterType: homelab-kvm
+                  destinationName: ""
+                  destinationServer: https://kubernetes.default.svc
+                - clusterName: oci-lab
+                  clusterType: cloud
+                  destinationName: oci-lab
+                  destinationServer: ""
           - git:
               repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
               revision: HEAD
@@ -74,7 +94,15 @@ spec:
           targetRevision: HEAD
           ref: v
       destination:
-        server: https://kubernetes.default.svc
+        # oci-lab has no in-cluster Argo: target the registered external
+        # cluster by name. Its Secret lives in unraid-lab's argocd namespace
+        # (clusters/unraid-lab/apps/oci-cluster-registration). Exactly one of
+        # name/server is set per element — Argo resolves by name when server
+        # is empty, by server when name is empty. The fields stay pure YAML:
+        # ApplicationSet templates render AFTER YAML parsing, so conditional
+        # KEYS are not possible here; per-element params keep it parseable.
+        name: "{{ .destinationName }}"
+        server: "{{ .destinationServer }}"
         namespace: "{{.namespace}}"
       syncPolicy:
         automated:

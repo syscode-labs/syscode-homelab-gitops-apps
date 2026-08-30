@@ -1,0 +1,24 @@
+# unraid-lab-only. Argo CD on unraid-lab reconciles the oci-lab external
+# cluster (see oci-cluster-registration). This Application ships the
+# cluster-registration ExternalSecret into unraid's Argo CD — it is a
+# plain raw manifest, not a chart-app.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: oci-cluster-registration
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+    targetRevision: HEAD
+    path: clusters/unraid-lab/apps/oci-cluster-registration/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

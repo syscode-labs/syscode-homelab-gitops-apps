@@ -3,6 +3,9 @@
 # until the owner delivers the bw-auth-token Secret + fills in
 # organizationId/projectId/bwSecretId — see add-external-secrets-bitwarden
 # (syscode-ai-internal-plans).
+#
+# Applied by unraid-lab's Argo (oci-raw lane) to the registered oci-lab
+# cluster — oci-lab runs no local Argo CD.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -15,7 +18,7 @@ spec:
     targetRevision: HEAD
     path: clusters/oci-lab/apps/oci-pivot-secrets/manifests
   destination:
-    server: https://kubernetes.default.svc
+    name: oci-lab
     namespace: oci-pivot-system
   syncPolicy:
     automated:

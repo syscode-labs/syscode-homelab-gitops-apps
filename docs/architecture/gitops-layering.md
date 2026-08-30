@@ -1,21 +1,27 @@
 # GitOps layering: base → type → cluster
 
-How apps and config are layered across clusters. Self-managed Argo CD (each
-cluster runs its own), no central hub.
+How apps and config are layered across clusters. One Argo CD, hosted in
+`unraid-lab`; `oci-lab` is reconciled remotely through a registered external
+cluster (see Current state / TODO below).
 
 ## Bootstrap
 
-Talos `inlineManifests` (per cluster) install Argo CD, then seed **three roots**.
-The only per-cluster difference is the cluster's identity (`clusterName`,
-`clusterType`), baked into the seeded `appset`.
+Talos `inlineManifests` on unraid-lab install Argo CD and seed **three roots**:
 
 - **`apps`** (ApplicationSet) — syncs `apps/*`, `types/<type>/apps/*`,
-  `clusters/<name>/apps/*`. The **chart-apps**, values layered.
+  `clusters/<name>/apps/*`. The **chart-apps**, values layered. Covers BOTH
+  clusters; oci-lab Applications target the registered `oci-lab` cluster.
 - **`bootstrap`** (Application) — syncs `bootstrap/`. Shared raw manifests
   (tailscale operator).
-- **`<cluster>-raw`** (Application) — syncs
-  `clusters/<name>/apps/*/application.yaml`. **Custom ApplicationSets** that
-  aren't chart-apps (arc-runners).
+- **`unraid-raw`** (Application) — syncs
+  `clusters/unraid-lab/apps/*/application.yaml`. **Custom ApplicationSets**
+  and raw apps, including the oci-* lanes below.
+
+On oci-lab, `inlineManifests` bootstrap **Cilium only** (plus the
+`argocd-manager` service account unraid's Argo authenticates as) — no local
+Argo CD. Three unraid-hosted Applications reconcile it:
+`oci-cluster-registration`, `oci-raw` (`clusters/oci-lab/apps/*/application.yaml`),
+`oci-bootstrap` (`bootstrap/` tailscale manifests).
 
 Chart-app lane keys on **`app.yaml`**; raw lane keys on **`application.yaml`** —
 so the two never double-manage an app in the same directory.
@@ -70,12 +76,22 @@ Argo Application per app, with the layered `valueFiles`.
 
 ## Current state / TODO
 
-- `appset.yaml` (repo root) is the canonical ApplicationSet. `omni/scripts/generate-manifests.sh`
-  already injects it into each cluster's `inlineManifests` along with the Argo CD
-  install manifest.
+- `appset.yaml` (repo root) is the canonical ApplicationSet. It is hosted ONCE,
+  in unraid-lab's Argo CD (injected via unraid-lab's `inlineManifests`), and
+  covers BOTH clusters: static `unraid-lab`/`oci-lab` list elements; the
+  `destination` template targets the in-cluster server for unraid-lab and the
+  registered external cluster `name: oci-lab` for OCI.
+- `oci-lab` runs NO local Argo CD. Its inline manifests bootstrap Cilium plus
+  the `argocd-manager` service account only. unraid-lab's Argo reconciles it
+  through the registered external cluster:
+  `clusters/unraid-lab/apps/oci-cluster-registration` (ExternalSecret →
+  argocd cluster Secret; endpoint is the private VPN-subnet API address),
+  `oci-raw` (raw lane for `clusters/oci-lab/apps/*/application.yaml`),
+  `oci-bootstrap` (tailscale-* manifests from `bootstrap/`).
 - `unraid-lab` is validated: all Argo CD Applications are **Synced** and **Healthy**.
-- **OCI remains to be validated.** Run a no-op re-sync check on `oci-lab` before
-  the GitOps layering fully replaces the live setup there.
+- **OCI not yet bootstrapped.** First bootstrap happens after these changes
+  land; validate app sync after cluster registration (see
+  centralize-oci-gitops-and-node-dns in syscode-ai-internal-plans).
 - Migrated: cert-manager, cilium (shared, `apps/`); harbor, arc-controller
   (unraid-only, `clusters/unraid-lab/apps/`). arc-runners stays a custom
   ApplicationSet on the raw lane.

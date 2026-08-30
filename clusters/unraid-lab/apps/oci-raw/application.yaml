@@ -1,0 +1,27 @@
+# unraid-lab-only. Raw-manifest lane for the oci-lab EXTERNAL cluster:
+# plain-manifest apps that aren't a chart-app (e.g. cert-manager
+# Issuer/Certificate, oci-pivot-secrets) applied to oci-lab by unraid's
+# Argo CD. Mirrors argocd-unraid-raw — oci-lab runs no local Argo CD.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: oci-raw
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+    targetRevision: HEAD
+    path: clusters/oci-lab/apps
+    directory:
+      recurse: true
+      include: "*/application.yaml"
+  destination:
+    name: oci-lab
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
