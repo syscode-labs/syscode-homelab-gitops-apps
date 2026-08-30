@@ -1,8 +1,6 @@
-# oci-lab-only. BitwardenSecret for oci-pivot-controller's Bitwarden-sourced
-# secrets, synced by the bitwarden-sm-operator chart-app. Stays unhealthy
-# until the owner delivers the bw-auth-token Secret + fills in
-# organizationId/projectId/bwSecretId — see add-external-secrets-bitwarden
-# (syscode-ai-internal-plans).
+# oci-lab-only. ESO syncs oci-pivot-controller's Bitwarden-sourced secret.
+# It stays unhealthy until secret zero (`bw-auth-token`) is restored. ESO is
+# assigned an earlier sync wave so the ExternalSecret CRD exists first.
 #
 # Applied by unraid-lab's Argo (oci-raw lane) to the registered oci-lab
 # cluster — oci-lab runs no local Argo CD.
@@ -11,6 +9,8 @@ kind: Application
 metadata:
   name: oci-pivot-secrets
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   project: default
   source:
@@ -26,3 +26,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true

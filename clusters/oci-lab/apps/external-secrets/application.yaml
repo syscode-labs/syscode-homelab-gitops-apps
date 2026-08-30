@@ -1,0 +1,37 @@
+# ESO is an OCI raw-lane application because the vendored chart, its values,
+# and the Bitwarden store resources must be applied together.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: oci-external-secrets
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+    argocd.argoproj.io/compare-options: ServerSideDiff=true
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+      targetRevision: HEAD
+      path: vendor/external-secrets
+      helm:
+        releaseName: external-secrets
+        valueFiles:
+          - $values/clusters/oci-lab/apps/external-secrets/values.yaml
+    - repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+      targetRevision: HEAD
+      path: clusters/oci-lab/apps/external-secrets/manifests
+  destination:
+    name: oci-lab
+    namespace: external-secrets
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true

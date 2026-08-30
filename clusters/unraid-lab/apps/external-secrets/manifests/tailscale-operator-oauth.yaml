@@ -1,0 +1,26 @@
+# The Bitwarden value has exactly two newline-separated fields: client ID then
+# client secret. ESO owns the target so it is recreated after a cluster reset.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: tailscale-operator-oauth
+  namespace: tailscale
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: bitwarden
+    kind: ClusterSecretStore
+  target:
+    name: operator-oauth
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    template:
+      engineVersion: v2
+      type: Opaque
+      data:
+        client_id: '{{ index (splitList "\n" .oauth) 0 }}'
+        client_secret: '{{ index (splitList "\n" .oauth) 1 }}'
+  data:
+    - secretKey: oauth
+      remoteRef:
+        key: Tailscale Operator Omni
