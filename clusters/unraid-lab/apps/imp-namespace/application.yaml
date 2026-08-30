@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: imp-namespace
   namespace: argocd
+  labels:
+    syscode.io/cluster: unraid-lab
   annotations:
     argocd.argoproj.io/sync-wave: "0"
 spec:

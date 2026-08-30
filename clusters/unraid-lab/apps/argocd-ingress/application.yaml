@@ -6,6 +6,8 @@ kind: Application
 metadata:
   name: argocd-ingress
   namespace: argocd
+  labels:
+    syscode.io/cluster: unraid-lab
 spec:
   project: default
   source:

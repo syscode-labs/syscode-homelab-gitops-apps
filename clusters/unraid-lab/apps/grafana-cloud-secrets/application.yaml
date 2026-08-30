@@ -5,6 +5,8 @@ kind: Application
 metadata:
   name: grafana-cloud-secrets
   namespace: argocd
+  labels:
+    syscode.io/cluster: unraid-lab
 spec:
   project: default
   source:

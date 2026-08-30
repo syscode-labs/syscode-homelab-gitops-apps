@@ -80,6 +80,8 @@ spec:
       # Keep existing unraid-lab Application names stable. OCI shares many app
       # paths, so it needs a prefix to avoid a name collision.
       name: '{{ if eq .clusterName "oci-lab" }}oci-lab-{{ .path.basename }}{{ else }}{{ .path.basename }}{{ end }}'
+      labels:
+        syscode.io/cluster: '{{ .clusterName }}'
     spec:
       project: default
       sources:

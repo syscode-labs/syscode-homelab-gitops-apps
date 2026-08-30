@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: radar-pg
   namespace: argocd
+  labels:
+    syscode.io/cluster: unraid-lab
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:

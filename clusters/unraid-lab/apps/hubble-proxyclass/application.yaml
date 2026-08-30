@@ -8,6 +8,8 @@ kind: Application
 metadata:
   name: hubble-proxyclass
   namespace: argocd
+  labels:
+    syscode.io/cluster: unraid-lab
 spec:
   project: default
   source:

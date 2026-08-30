@@ -5,6 +5,8 @@ kind: Application
 metadata:
   name: etcd-metrics-network-policy
   namespace: argocd
+  labels:
+    syscode.io/cluster: unraid-lab
 spec:
   project: default
   source:
