@@ -17,7 +17,7 @@ spec:
       recurse: true
       include: "*/application.yaml"
   destination:
-    name: oci-lab
+    server: https://kubernetes.default.svc
     namespace: argocd
   syncPolicy:
     automated:
