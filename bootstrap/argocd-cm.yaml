@@ -22,6 +22,7 @@ data:
     issuer: https://auth.wind-bearded.ts.net
     clientID: e8ae167f-f0c8-49c7-be92-0114a1ade320
     clientSecret: $argocd-pocketid-oidc:clientSecret
+    enableUserInfoGroups: true
     # Tailscale issues this hostname from Let's Encrypt's Generation Y chain.
     # Root YE is not yet in standard operating-system trust stores.
     rootCA: |
