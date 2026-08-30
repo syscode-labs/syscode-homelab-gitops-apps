@@ -34263,7 +34263,9 @@ cluster:
                         - path: clusters/{{.clusterName}}/apps/*/app.yaml
           template:
             metadata:
-              name: "{{.path.basename}}"                # app name = its directory name
+              # Keep existing unraid-lab Application names stable. OCI shares many app
+              # paths, so it needs a prefix to avoid a name collision.
+              name: '{{ if eq .clusterName "oci-lab" }}oci-lab-{{ .path.basename }}{{ else }}{{ .path.basename }}{{ end }}'
             spec:
               project: default
               sources:
