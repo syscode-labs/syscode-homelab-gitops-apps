@@ -54,3 +54,7 @@ cluster:
           - kind: ServiceAccount
             name: argocd-manager
             namespace: kube-system
+          # Omni's Kubernetes API Proxy authenticates Argo with this group.
+          # Keep it scoped to the same role as the direct service-account path.
+          - kind: Group
+            name: argocd-oci
