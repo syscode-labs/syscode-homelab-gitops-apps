@@ -12,4 +12,5 @@ data:
   policy.default: ""
   scopes: '[groups, email]'
   policy.csv: |
-    g, argocd-admins, role:admin
+    # PocketID's OIDC claim uses this underscore-normalized group name.
+    g, argocd_admins, role:admin
