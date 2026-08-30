@@ -77,9 +77,10 @@ spec:
                 - path: clusters/{{.clusterName}}/apps/*/app.yaml
   template:
     metadata:
-      # Keep existing unraid-lab Application names stable. OCI shares many app
-      # paths, so it needs a prefix to avoid a name collision.
-      name: '{{ if eq .clusterName "oci-lab" }}oci-lab-{{ .path.basename }}{{ else }}{{ .path.basename }}{{ end }}'
+      # Every chart-app Application is cluster-prefixed (e.g. unraid-lab-cilium,
+      # oci-lab-cilium) so the Applications list is scannable without inferring
+      # from Destination or label. Rule: never use unprefixed {{.path.basename}}.
+      name: '{{ .clusterName }}-{{ .path.basename }}'
       labels:
         syscode.io/cluster: '{{ .clusterName }}'
     spec:
