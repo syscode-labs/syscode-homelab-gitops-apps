@@ -1,4 +1,4 @@
-# compartmentId comes from Bitwarden Secrets Manager via bitwarden-sm-operator
+# compartmentId comes from Bitwarden Secrets Manager via External Secrets Operator
 # (see clusters/oci-lab/apps/oci-pivot-secrets) as OCI_COMPARTMENT_ID, not a
 # plain Helm value — was committed here once, had to be scrubbed from git
 # history. Never put the real OCID in this file again.

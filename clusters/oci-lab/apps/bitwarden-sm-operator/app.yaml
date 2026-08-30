@@ -1,7 +1,0 @@
-# oci-lab-only chart-app. Bitwarden's own first-party Secrets Manager
-# operator — no sdk-server companion, no TLS setup needed (unlike External
-# Secrets Operator's generic Bitwarden provider, which this replaced).
-chart: sm-operator
-repoURL: https://charts.bitwarden.com/
-version: "2.0.3"
-namespace: sm-operator-system

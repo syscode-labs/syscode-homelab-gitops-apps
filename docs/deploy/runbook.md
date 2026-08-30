@@ -129,6 +129,18 @@ sops -d /path/to/homelab-secrets/unraid-lab/bws-token.enc.yaml | \
   kubectl --context omni-unraid-lab apply -f -
 ```
 
-Everything else (grafana-cloud, argocd-pocketid-oidc) then syncs via
-ExternalSecrets against ClusterSecretStore `bitwarden`. Never create
-per-namespace provider tokens; never paste the token into any agent session.
+Everything else (grafana-cloud, argocd-pocketid-oidc, and
+tailscale/operator-oauth) then syncs via ExternalSecrets against
+ClusterSecretStore `bitwarden`. The Tailscale Bitwarden value has the client
+ID on line one and client secret on line two; ESO templates those into the
+keys the operator requires. Never create per-namespace provider tokens; never
+paste the token into any agent session.
+
+## Secrets bootstrap (oci-lab, ESO + Bitwarden)
+
+OCI runs the same vendored ESO chart and Bitwarden SDK-server plugin as
+unraid-lab. Restore its existing machine-account token as
+`oci-pivot-system/bw-auth-token` (key `token`) before ESO can reconcile the
+`bitwarden-oci` ClusterSecretStore. The token is secret zero and stays outside
+this repository; the OCI pivot compartment ID then arrives through its
+ExternalSecret.

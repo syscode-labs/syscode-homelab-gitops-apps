@@ -4,3 +4,4 @@ resources:
   - issuer.yaml
   - certificate.yaml
   - clustersecretstore.yaml
+  - tailscale-operator-oauth.yaml
