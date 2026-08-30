@@ -35,7 +35,7 @@ case "$CLUSTER" in
     FILE="clusters/unraid-lab/omni/inline-manifests.yaml"
     WITH_ARGOCD=1
     WITH_CILIUM=0
-    ARGOCD_VERSION="${ARGOCD_VERSION:-v3.5.0}"
+    ARGOCD_VERSION="${ARGOCD_VERSION:-v3.5.2}"
     ;;
   *)
     echo "unknown cluster '$CLUSTER' (expected oci-lab or unraid-lab)" >&2
