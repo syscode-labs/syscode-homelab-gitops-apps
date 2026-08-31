@@ -1,0 +1,8 @@
+# oci-lab-only: right-size the vCluster syncer for the 1 vCPU worker node.
+# Requests only — the syncer may burst beyond them; limits stay at chart defaults.
+controlPlane:
+  statefulSet:
+    resources:
+      requests:
+        cpu: 40m
+        memory: 128Mi

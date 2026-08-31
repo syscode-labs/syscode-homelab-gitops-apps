@@ -1,0 +1,11 @@
+# oci-lab-only: right-size Crossplane for the 1 vCPU worker node
+# (allocatable 950m, ~116m free after existing workloads).
+# Requests only — pods may burst beyond them; limits stay at chart defaults.
+resourcesCrossplane:
+  requests:
+    cpu: 40m
+    memory: 128Mi
+resourcesRBACManager:
+  requests:
+    cpu: 30m
+    memory: 64Mi
