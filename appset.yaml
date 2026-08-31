@@ -1,11 +1,9 @@
 # Layering ApplicationSet — the "chart-app" engine.
 #
-# ONE instance, hosted in unraid-lab's Argo CD (embedded via unraid-lab's Talos
-# inline manifests). It covers BOTH clusters: oci-lab is reconciled remotely
-# through the registered external cluster — oci-lab deliberately runs no local
-# Argo CD. Application destinations differ per element (see the conditional in
-# `destination` below): in-cluster server for unraid-lab, registered cluster
-# name `oci-lab` for OCI.
+# ONE instance, hosted in oci-lab's Argo CD (embedded via OCI's Talos inline
+# manifests). It covers BOTH clusters: unraid-lab is reconciled remotely through
+# the registered external cluster. Application destinations differ per element:
+# registered cluster name `unraid-lab` for Unraid and in-cluster server for OCI.
 #
 # Selection (which apps run): three git generators —
 #   apps/*/app.yaml                        shared (every cluster)
@@ -30,12 +28,12 @@ spec:
               elements:
                 - clusterName: unraid-lab
                   clusterType: homelab-kvm
-                  destinationName: ""
-                  destinationServer: https://kubernetes.default.svc
+                  destinationName: unraid-lab
+                  destinationServer: ""
                 - clusterName: oci-lab
                   clusterType: cloud
-                  destinationName: oci-lab
-                  destinationServer: ""
+                  destinationName: ""
+                  destinationServer: https://kubernetes.default.svc
           - git:
               repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
               revision: HEAD
@@ -47,12 +45,12 @@ spec:
               elements:
                 - clusterName: unraid-lab
                   clusterType: homelab-kvm
-                  destinationName: ""
-                  destinationServer: https://kubernetes.default.svc
+                  destinationName: unraid-lab
+                  destinationServer: ""
                 - clusterName: oci-lab
                   clusterType: cloud
-                  destinationName: oci-lab
-                  destinationServer: ""
+                  destinationName: ""
+                  destinationServer: https://kubernetes.default.svc
           - git:
               repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
               revision: HEAD
@@ -64,12 +62,12 @@ spec:
               elements:
                 - clusterName: unraid-lab
                   clusterType: homelab-kvm
-                  destinationName: ""
-                  destinationServer: https://kubernetes.default.svc
+                  destinationName: unraid-lab
+                  destinationServer: ""
                 - clusterName: oci-lab
                   clusterType: cloud
-                  destinationName: oci-lab
-                  destinationServer: ""
+                  destinationName: ""
+                  destinationServer: https://kubernetes.default.svc
           - git:
               repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps
               revision: HEAD
@@ -99,11 +97,10 @@ spec:
           targetRevision: HEAD
           ref: v
       destination:
-        # oci-lab has no in-cluster Argo: target the registered external
-        # cluster by name. Its Secret lives in unraid-lab's argocd namespace
-        # (clusters/unraid-lab/apps/oci-cluster-registration). Exactly one of
-        # name/server is set per element — Argo resolves by name when server
-        # is empty, by server when name is empty. The fields stay pure YAML:
+        # unraid-lab is remote and identified by the Secret in OCI's argocd
+        # namespace. OCI uses its in-cluster API server. Exactly one of
+        # name/server is set per element — Argo resolves by name when server is
+        # empty, by server when name is empty. The fields stay pure YAML:
         # ApplicationSet templates render AFTER YAML parsing, so conditional
         # KEYS are not possible here; per-element params keep it parseable.
         name: "{{ .destinationName }}"

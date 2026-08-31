@@ -1,24 +1,24 @@
+# Creates OCI Argo CD's registered-cluster Secret for unraid-lab. ESO owns the
+# credentials so the Omni service-account token never enters Git.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: oci-lab-argocd-rbac
+  name: oci-lab-unraid-cluster-registration
   namespace: argocd
   labels:
     syscode.io/cluster: oci-lab
   annotations:
-    argocd.argoproj.io/sync-wave: "-3"
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   project: default
   source:
     repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
     targetRevision: HEAD
-    path: clusters/oci-lab/apps/argocd-rbac/manifests
+    path: clusters/oci-lab/apps/unraid-cluster-registration/manifests
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: argocd
   syncPolicy:
     automated:
-      prune: false
+      prune: true
       selfHeal: true
-    syncOptions:
-      - ServerSideApply=true

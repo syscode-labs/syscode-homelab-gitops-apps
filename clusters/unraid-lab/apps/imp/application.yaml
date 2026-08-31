@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: imp
+  name: unraid-lab-imp
   namespace: argocd
   labels:
     syscode.io/cluster: unraid-lab
@@ -24,7 +24,7 @@ spec:
       targetRevision: HEAD
       ref: values
   destination:
-    server: https://kubernetes.default.svc
+    name: unraid-lab
     namespace: imp-system
   syncPolicy:
     automated:

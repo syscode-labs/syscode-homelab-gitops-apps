@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 # Fill the generated blocks of a cluster's Talos inline-manifests:
-#   unraid-lab   argocd       raw Argo CD install manifest (upstream install.yaml)
+#   oci-lab      argocd       raw Argo CD install manifest (upstream install.yaml)
 #                argocd-apps  appset.yaml — the layering ApplicationSet, embedded
-#                             verbatim (it covers BOTH clusters; oci-lab apps are
-#                             reconciled remotely through the registered cluster)
-#   oci-lab      cilium       rendered Cilium — oci-lab bootstraps Cilium ONLY,
-#                             no local Argo CD (unraid-lab's Argo reconciles it
-#                             through the registered external cluster)
+#                             verbatim and reconciling both clusters
+#                cilium       rendered Cilium for the kube-proxy-free cluster
 #
 # The static blocks (oci-lab's argocd-manager RBAC, unraid's argocd-bootstrap /
 # argocd-unraid-raw) and every comment are left untouched — yq edits only the
@@ -28,8 +25,9 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 case "$CLUSTER" in
   oci-lab)
     FILE="omni/cluster-templates/patches/oci-lab-inline-manifests.yaml"
-    WITH_ARGOCD=0
+    WITH_ARGOCD=1
     WITH_CILIUM=1
+    ARGOCD_VERSION="${ARGOCD_VERSION:-v3.5.2}"
     ;;
   unraid-lab)
     FILE="clusters/unraid-lab/omni/inline-manifests.yaml"

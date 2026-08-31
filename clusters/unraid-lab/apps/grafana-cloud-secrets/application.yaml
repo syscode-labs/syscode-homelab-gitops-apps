@@ -3,7 +3,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: grafana-cloud-secrets
+  name: unraid-lab-grafana-cloud-secrets
   namespace: argocd
   labels:
     syscode.io/cluster: unraid-lab
@@ -14,7 +14,7 @@ spec:
     targetRevision: HEAD
     path: clusters/unraid-lab/apps/grafana-cloud-secrets/manifests
   destination:
-    server: https://kubernetes.default.svc
+    name: unraid-lab
     namespace: monitoring
   syncPolicy:
     automated:

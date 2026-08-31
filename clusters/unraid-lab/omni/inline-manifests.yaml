@@ -34347,3 +34347,31 @@ cluster:
               selfHeal: true
             syncOptions:
               - CreateNamespace=true
+    - name: argocd-unraid-manager
+      contents: |
+        # OCI-hosted Argo CD authenticates through Omni's Kubernetes proxy with
+        # this dedicated group after the control-plane handover.
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRole
+        metadata:
+          name: argocd-unraid-manager
+        rules:
+          - apiGroups: ["*"]
+            resources: ["*"]
+            verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
+          - apiGroups: ["rbac.authorization.k8s.io"]
+            resources: ["clusterroles", "clusterrolebindings", "roles", "rolebindings"]
+            verbs: ["bind", "escalate", "get", "list", "watch", "create", "update", "patch", "delete"]
+        ---
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: argocd-unraid-manager
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: argocd-unraid-manager
+        subjects:
+          - kind: Group
+            name: argocd-unraid
+            apiGroup: rbac.authorization.k8s.io

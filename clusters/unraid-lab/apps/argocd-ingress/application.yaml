@@ -4,7 +4,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-ingress
+  name: unraid-lab-argocd-ingress
   namespace: argocd
   labels:
     syscode.io/cluster: unraid-lab
@@ -15,7 +15,7 @@ spec:
     targetRevision: HEAD
     path: clusters/unraid-lab/apps/argocd-ingress/manifests
   destination:
-    server: https://kubernetes.default.svc
+    name: unraid-lab
     namespace: argocd
   syncPolicy:
     automated:

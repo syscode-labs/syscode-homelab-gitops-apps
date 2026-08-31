@@ -6,7 +6,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: hubble-proxyclass
+  name: unraid-lab-hubble-proxyclass
   namespace: argocd
   labels:
     syscode.io/cluster: unraid-lab
@@ -17,7 +17,7 @@ spec:
     targetRevision: HEAD
     path: clusters/unraid-lab/apps/hubble-proxyclass/manifests
   destination:
-    server: https://kubernetes.default.svc
+    name: unraid-lab
     namespace: tailscale
   syncPolicy:
     automated:

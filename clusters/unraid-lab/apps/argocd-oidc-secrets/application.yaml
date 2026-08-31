@@ -5,7 +5,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-oidc-secrets
+  name: unraid-lab-argocd-oidc-secrets
   namespace: argocd
   labels:
     syscode.io/cluster: unraid-lab
@@ -16,7 +16,7 @@ spec:
     targetRevision: HEAD
     path: clusters/unraid-lab/apps/argocd-oidc-secrets/manifests
   destination:
-    server: https://kubernetes.default.svc
+    name: unraid-lab
     namespace: argocd
   syncPolicy:
     automated:

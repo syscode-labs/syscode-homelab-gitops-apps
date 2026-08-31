@@ -8,7 +8,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: external-secrets
+  name: unraid-lab-external-secrets
   namespace: argocd
   labels:
     syscode.io/cluster: unraid-lab
@@ -34,7 +34,7 @@ spec:
       targetRevision: HEAD
       path: clusters/unraid-lab/apps/external-secrets/manifests
   destination:
-    server: https://kubernetes.default.svc
+    name: unraid-lab
     namespace: external-secrets
   syncPolicy:
     automated:

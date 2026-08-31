@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: imp-crds
+  name: unraid-lab-imp-crds
   namespace: argocd
   labels:
     syscode.io/cluster: unraid-lab
@@ -14,7 +14,7 @@ spec:
     targetRevision: v0.7.0 # HA operator
     path: config/crd/bases
   destination:
-    server: https://kubernetes.default.svc
+    name: unraid-lab
     namespace: imp-system
   syncPolicy:
     automated:

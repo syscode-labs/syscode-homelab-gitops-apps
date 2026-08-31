@@ -13,7 +13,7 @@ spec:
     targetRevision: HEAD
     path: clusters/oci-lab/apps/grafana-cloud-secrets/manifests
   destination:
-    name: oci-lab
+    server: https://kubernetes.default.svc
     namespace: monitoring
   syncPolicy:
     automated:

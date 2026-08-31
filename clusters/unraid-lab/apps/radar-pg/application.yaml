@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: radar-pg
+  name: unraid-lab-radar-pg
   namespace: argocd
   labels:
     syscode.io/cluster: unraid-lab
@@ -21,7 +21,7 @@ spec:
       targetRevision: main
       ref: values
   destination:
-    server: https://kubernetes.default.svc
+    name: unraid-lab
     namespace: radar-pg
   syncPolicy:
     automated:

@@ -1,18 +1,33 @@
 #!/usr/bin/env bash
-# Apply generated unraid-lab inline manifests and upgrade the live Argo install.
+# Apply generated cluster inline manifests and upgrade the live Argo install.
 set -euo pipefail
 
-CLUSTER="unraid-lab"
+CLUSTER="${1:-unraid-lab}"
+if [[ "$CLUSTER" == "oci-lab" || "$CLUSTER" == "unraid-lab" ]]; then
+  shift || true
+else
+  CLUSTER="unraid-lab"
+fi
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-MANIFESTS="$REPO_ROOT/clusters/$CLUSTER/omni/inline-manifests.yaml"
-ARGOCD_CONFIG="$REPO_ROOT/bootstrap/argocd-cm.yaml"
-PATCH_ID="202-cluster-$CLUSTER-omni/patches/inline-manifests.yaml"
+
+case "$CLUSTER" in
+  oci-lab)
+    MANIFESTS="$REPO_ROOT/omni/cluster-templates/patches/oci-lab-inline-manifests.yaml"
+    PATCH_ID="202-cluster-oci-lab-patches/oci-lab-inline-manifests.yaml"
+    ARGOCD_CONFIG=""
+    ;;
+  unraid-lab)
+    MANIFESTS="$REPO_ROOT/clusters/$CLUSTER/omni/inline-manifests.yaml"
+    PATCH_ID="202-cluster-unraid-lab-omni/patches/inline-manifests.yaml"
+    ARGOCD_CONFIG="$REPO_ROOT/bootstrap/argocd-cm.yaml"
+    ;;
+esac
 
 [[ -f "$MANIFESTS" ]] || {
   printf 'missing %s\n' "$MANIFESTS" >&2
   exit 1
 }
-[[ -f "$ARGOCD_CONFIG" ]] || {
+[[ -z "$ARGOCD_CONFIG" || -f "$ARGOCD_CONFIG" ]] || {
   printf 'missing %s\n' "$ARGOCD_CONFIG" >&2
   exit 1
 }
@@ -104,15 +119,19 @@ PY
   omnictl kubeconfig "$temporary/kubeconfig" --cluster "$CLUSTER" --merge=false --force
   KUBECONFIG="$temporary/kubeconfig" kubectl apply --server-side --force-conflicts \
     -f "$temporary/argocd.yaml"
-  KUBECONFIG="$temporary/kubeconfig" kubectl apply --server-side --force-conflicts \
-    -f "$ARGOCD_CONFIG"
+  if [[ -n "$ARGOCD_CONFIG" ]]; then
+    KUBECONFIG="$temporary/kubeconfig" kubectl apply --server-side --force-conflicts \
+      -f "$ARGOCD_CONFIG"
+  fi
   KUBECONFIG="$temporary/kubeconfig" kubectl rollout status deployment/argocd-server \
     -n argocd --timeout=5m
-  [[ "$(curl -ksS -o /dev/null -w '%{http_code}' --max-redirs 0 \
-    https://argocd-unraid-lab.wind-bearded.ts.net)" == "200" ]] || {
-    printf 'Argo CD did not become reachable without a redirect after rollout.\n' >&2
-    exit 1
-  }
+  if [[ "$CLUSTER" == "unraid-lab" ]]; then
+    [[ "$(curl -ksS -o /dev/null -w '%{http_code}' --max-redirs 0 \
+      https://argocd-unraid-lab.wind-bearded.ts.net)" == "200" ]] || {
+      printf 'Argo CD did not become reachable without a redirect after rollout.\n' >&2
+      exit 1
+    }
+  fi
   printf 'Argo CD upgraded from the generated manifest.\n'
 else
   printf 'Inline-manifest ConfigPatch and Argo CD manifest rendered and validated; re-run with --apply to deploy.\n'
