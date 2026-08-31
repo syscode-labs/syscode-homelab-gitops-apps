@@ -1,7 +1,15 @@
-# oci-lab-only: right-size the vCluster syncer for the 1 vCPU worker node.
-# Requests only — the syncer may burst beyond them; limits stay at chart defaults.
+# oci-lab-only: run the vCluster syncer on the control-plane node (worker node
+# is 1 vCPU and near-full). CP node has ~390m free.
 controlPlane:
   statefulSet:
+    scheduling:
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+    # Right-sized requests — cheap insurance while the CP node stays a 1 vCPU node.
     resources:
       requests:
         cpu: 40m

@@ -1,6 +1,19 @@
-# oci-lab-only: right-size Crossplane for the 1 vCPU worker node
-# (allocatable 950m, ~116m free after existing workloads).
-# Requests only — pods may burst beyond them; limits stay at chart defaults.
+# oci-lab-only: run Crossplane controllers on the control-plane node (worker
+# node is 1 vCPU and near-full). CP node has ~390m free.
+nodeSelector:
+  node-role.kubernetes.io/control-plane: ""
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+rbacManager:
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+# Right-sized requests — cheap insurance while the CP node stays a 1 vCPU node.
 resourcesCrossplane:
   requests:
     cpu: 40m
