@@ -1,0 +1,27 @@
+# Argo CD runs in OCI without a node-level Tailscale client. The operator's L3
+# egress proxy provides private access to Omni's Kubernetes API proxy instead.
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyGroup
+metadata:
+  name: omni-egress
+  namespace: argocd
+spec:
+  type: egress
+  replicas: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: omni-kubernetes-proxy
+  namespace: argocd
+  annotations:
+    tailscale.com/tailnet-fqdn: omni.wind-bearded.ts.net
+    tailscale.com/proxy-group: omni-egress
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: https
+      port: 8100
+      protocol: TCP
+      targetPort: 8100
