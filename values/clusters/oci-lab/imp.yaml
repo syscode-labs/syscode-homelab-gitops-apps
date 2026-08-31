@@ -1,4 +1,7 @@
 operator:
+  # OCI currently has one schedulable Imp worker; two anti-affined replicas
+  # cannot both schedule until a second eligible worker exists.
+  replicaCount: 1
   resources:
     requests:
       cpu: "100m"
