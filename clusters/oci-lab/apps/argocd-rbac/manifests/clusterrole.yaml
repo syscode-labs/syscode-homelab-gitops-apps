@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argocd-manager
+  # Keep Talos inventory annotation so bootstrap does not prune it; Argo will
+  # ServerSideApply the additional rule for Grafana Alloy RBAC.
+  annotations:
+    config.k8s.io/owning-inventory: talos-bootstrap-manifests-inventory
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles", "clusterrolebindings", "roles", "rolebindings"]
+    verbs: ["bind", "escalate", "get", "list", "watch", "create", "update", "patch", "delete"]
