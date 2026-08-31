@@ -6,6 +6,8 @@ operator:
     limits:
       memory: "256Mi"
 agent:
+  env:
+    kernelPath: /usr/local/share/imp/vmlinux
   resources:
     requests:
       cpu: "100m"
