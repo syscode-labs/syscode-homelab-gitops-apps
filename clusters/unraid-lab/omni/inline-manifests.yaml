@@ -33937,10 +33937,10 @@ cluster:
                 resources:
                   limits:
                     cpu: "1"
-                    memory: 768Mi
+                    memory: 1536Mi
                   requests:
                     cpu: 250m
-                    memory: 256Mi
+                    memory: 512Mi
                 securityContext:
                   allowPrivilegeEscalation: false
                   capabilities:
