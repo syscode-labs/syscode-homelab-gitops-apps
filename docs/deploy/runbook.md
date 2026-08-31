@@ -144,3 +144,18 @@ unraid-lab. Restore its existing machine-account token as
 `bitwarden-oci` ClusterSecretStore. The token is secret zero and stays outside
 this repository; the OCI pivot compartment ID then arrives through its
 ExternalSecret.
+
+## Manual recovery record (2026-08-31)
+
+These actions repaired resources that were already stuck outside the intended
+GitOps reconciliation path. They must not be treated as regular deployment
+steps.
+
+- Removed finalizers from `argocd/unraid-lab-arc-controller`,
+  `argocd/arc-runner-scale-sets`, and
+  `argocd/unraid-lab-arc-runners-container` after deleting ARC from
+  unraid-lab left their Argo deletion operations stuck.
+- Labeled OCI worker `ampere-vnic-2-960682` with `imp/enabled=true` to enrol
+  one node for the Imp agent and runtime DaemonSets. This label must be moved
+  into the OCI machine's declared configuration before rebuilding or replacing
+  the node.
