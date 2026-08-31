@@ -14,7 +14,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/syscode-labs/imp.git
-      targetRevision: v0.8.0 # memory-pressure guardrails
+      targetRevision: v0.9.0
       path: charts/imp
       helm:
         releaseName: imp
