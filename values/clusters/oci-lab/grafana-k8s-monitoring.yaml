@@ -1,0 +1,8 @@
+cluster:
+  name: oci-lab
+
+# The base values scrape Unraid's fixed control-plane addresses. OCI has one
+# different control plane and does not expose those endpoints through this path.
+collectors:
+  alloy-metrics:
+    extraConfig: ""

@@ -1,21 +1,20 @@
+# Bitwarden Secrets Manager supplies Grafana Cloud credentials to OCI Alloy.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: oci-lab-imp-namespace
+  name: oci-lab-grafana-cloud-secrets
   namespace: argocd
   labels:
     syscode.io/cluster: oci-lab
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: default
   source:
     repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
     targetRevision: HEAD
-    path: clusters/oci-lab/apps/imp-namespace/manifests
+    path: clusters/oci-lab/apps/grafana-cloud-secrets/manifests
   destination:
     name: oci-lab
-    namespace: imp-system
+    namespace: monitoring
   syncPolicy:
     automated:
       prune: true
