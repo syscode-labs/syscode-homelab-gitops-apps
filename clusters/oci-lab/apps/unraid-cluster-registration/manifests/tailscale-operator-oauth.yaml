@@ -1,0 +1,26 @@
+# OCI's operator needs the same OAuth client as Unraid so its egress proxy can
+# reach tailnet-only services. ESO owns the target after every cluster reset.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: tailscale-operator-oauth
+  namespace: tailscale
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: bitwarden-oci
+    kind: ClusterSecretStore
+  target:
+    name: operator-oauth
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    template:
+      engineVersion: v2
+      type: Opaque
+      data:
+        client_id: '{{ index (splitList "\n" .oauth) 0 }}'
+        client_secret: '{{ index (splitList "\n" .oauth) 1 }}'
+  data:
+    - secretKey: oauth
+      remoteRef:
+        key: "124a3c15-f4f4-4592-a9d6-b4b700f66abf" # gitleaks:allow
