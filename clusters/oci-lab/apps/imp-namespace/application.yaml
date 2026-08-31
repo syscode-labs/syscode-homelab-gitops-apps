@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: imp-namespace
+  name: oci-lab-imp-namespace
   namespace: argocd
   labels:
     syscode.io/cluster: oci-lab
