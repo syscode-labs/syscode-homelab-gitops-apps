@@ -1,0 +1,5 @@
+# oci-lab-only chart-app: Crossplane controller (CRDs + API server).
+chart: crossplane
+repoURL: https://charts.crossplane.io/stable
+version: "2.4.0"
+namespace: crossplane-system

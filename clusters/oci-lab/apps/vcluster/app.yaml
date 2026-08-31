@@ -1,0 +1,5 @@
+# oci-lab-only chart-app: vCluster virtual cluster control plane.
+chart: vcluster
+repoURL: https://charts.loft.sh
+version: "0.36.1"
+namespace: vcluster
