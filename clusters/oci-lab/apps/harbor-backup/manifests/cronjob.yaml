@@ -1,0 +1,71 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: harbor-postgres-backup
+  namespace: harbor
+spec:
+  schedule: "17 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          nodeSelector:
+            node-role.kubernetes.io/control-plane: ""
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          volumes:
+            - name: backup
+              emptyDir: {}
+          initContainers:
+            - name: dump
+              image: postgres:16-alpine
+              env:
+                - name: PGHOST
+                  value: harbor-database
+                - name: PGUSER
+                  value: postgres
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: harbor-database
+                      key: POSTGRES_PASSWORD
+              command: [sh, -ceu]
+              args:
+                - |
+                  until pg_isready -d registry; do sleep 2; done
+                  pg_dump -Fc --no-owner --dbname=registry --file=/backup/harbor.dump
+                  sha256sum /backup/harbor.dump > /backup/latest.sha256
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          containers:
+            - name: upload
+              image: ghcr.io/syscode-labs/harbor-recovery@sha256:699393cbd0d6cf145e0f2e3b59ad8eda641639ce63168755e2c4d5245eb8159d
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: harbor-object-storage
+                      key: REGISTRY_STORAGE_S3_ACCESSKEY
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: harbor-object-storage
+                      key: REGISTRY_STORAGE_S3_SECRETKEY
+              command: [bash, -ceu]
+              args:
+                - |
+                  endpoint=https://lrbmlfacfnqw.compat.objectstorage.uk-london-1.oraclecloud.com
+                  aws --endpoint-url "$endpoint" s3 cp /backup/harbor.dump s3://harbor-registry/harbor/backups/latest.dump
+                  aws --endpoint-url "$endpoint" s3 cp /backup/latest.sha256 s3://harbor-registry/harbor/backups/latest.sha256
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup

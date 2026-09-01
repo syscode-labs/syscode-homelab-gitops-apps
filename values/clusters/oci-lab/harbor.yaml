@@ -54,6 +54,44 @@ portal:
 core:
   nodeSelector: *harborNodeSelector
   tolerations: *harborTolerations
+  initContainers:
+    - name: restore-empty-database
+      image: ghcr.io/syscode-labs/harbor-recovery@sha256:699393cbd0d6cf145e0f2e3b59ad8eda641639ce63168755e2c4d5245eb8159d
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: PGHOST
+          value: harbor-database
+        - name: PGUSER
+          value: postgres
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: harbor-database
+              key: POSTGRES_PASSWORD
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: harbor-object-storage
+              key: REGISTRY_STORAGE_S3_ACCESSKEY
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: harbor-object-storage
+              key: REGISTRY_STORAGE_S3_SECRETKEY
+      command: [bash, -ceu]
+      args:
+        - |
+          until pg_isready -d registry; do sleep 2; done
+          has_schema="$(psql -d registry -tAc "SELECT to_regclass('public.properties')")"
+          if [ -n "$has_schema" ] && [ "$has_schema" != "" ]; then
+            exit 0
+          fi
+          if ! aws --endpoint-url "https://lrbmlfacfnqw.compat.objectstorage.uk-london-1.oraclecloud.com" s3 cp s3://harbor-registry/harbor/backups/latest.dump /tmp/harbor.dump; then
+            exit 0
+          fi
+          aws --endpoint-url "https://lrbmlfacfnqw.compat.objectstorage.uk-london-1.oraclecloud.com" s3 cp s3://harbor-registry/harbor/backups/latest.sha256 /tmp/harbor.dump.sha256
+          (cd /tmp && sha256sum -c harbor.dump.sha256)
+          pg_restore --dbname=registry --no-owner --exit-on-error /tmp/harbor.dump
   resources:
     requests:
       cpu: 40m
