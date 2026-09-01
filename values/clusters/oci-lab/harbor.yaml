@@ -1,4 +1,4 @@
-# oci-lab-only: run Harbor on CP node. Registry data intentionally ephemeral.
+# oci-lab-only: run Harbor on CP node. Registry blobs/charts use OCI Object Storage.
 
 externalURL: https://harbor.wind-bearded.ts.net
 
@@ -14,9 +14,22 @@ expose:
     annotations:
       tailscale.com/proxy-class: hubble-kernel-net
 
-# No persistent storage requested. Harbor is a disposable cache here.
+# Registry blobs/charts persist in OCI Object Storage. Harbor metadata remains
+# node-local for now.
 persistence:
-  enabled: false
+  enabled: true
+  imageChartStorage:
+    type: s3
+    disableredirect: false
+    s3:
+      region: uk-london-1
+      regionendpoint: https://lrbmlfacfnqw.compat.objectstorage.uk-london-1.oraclecloud.com
+      bucket: harbor-registry
+      existingSecret: harbor-object-storage
+      secure: true
+      v4auth: true
+      rootdirectory: harbor
+
 
 # No vulnerability database/scanner on small OCI cluster.
 trivy:

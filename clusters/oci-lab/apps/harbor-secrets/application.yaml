@@ -1,0 +1,26 @@
+# OCI Object Storage credentials for Harbor registry blobs.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: oci-lab-harbor-secrets
+  namespace: argocd
+  labels:
+    syscode.io/cluster: oci-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+    targetRevision: HEAD
+    path: clusters/oci-lab/apps/harbor-secrets/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: harbor
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
