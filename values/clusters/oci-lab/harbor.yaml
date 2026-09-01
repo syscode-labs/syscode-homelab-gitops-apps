@@ -1,0 +1,90 @@
+# oci-lab-only: run Harbor on CP node. Registry data intentionally ephemeral.
+
+externalURL: https://harbor.wind-bearded.ts.net
+
+expose:
+  type: ingress
+  tls:
+    enabled: true
+    certSource: none
+  ingress:
+    hosts:
+      core: harbor.wind-bearded.ts.net
+    className: tailscale
+    annotations:
+      tailscale.com/proxy-class: hubble-kernel-net
+
+# No persistent storage requested. Harbor is a disposable cache here.
+persistence:
+  enabled: false
+
+# No vulnerability database/scanner on small OCI cluster.
+trivy:
+  enabled: false
+
+# CP node is tainted; worker is only 1 vCPU.
+# Reused by each Harbor component below.
+x-harborNodeSelector: &harborNodeSelector
+  node-role.kubernetes.io/control-plane: ""
+x-harborTolerations: &harborTolerations
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+
+portal:
+  nodeSelector: *harborNodeSelector
+  tolerations: *harborTolerations
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+core:
+  nodeSelector: *harborNodeSelector
+  tolerations: *harborTolerations
+  resources:
+    requests:
+      cpu: 40m
+      memory: 96Mi
+jobservice:
+  nodeSelector: *harborNodeSelector
+  tolerations: *harborTolerations
+  resources:
+    requests:
+      cpu: 30m
+      memory: 64Mi
+registry:
+  nodeSelector: *harborNodeSelector
+  tolerations: *harborTolerations
+  registry:
+    resources:
+      requests:
+        cpu: 30m
+        memory: 64Mi
+  controller:
+    resources:
+      requests:
+        cpu: 20m
+        memory: 32Mi
+database:
+  internal:
+    nodeSelector: *harborNodeSelector
+    tolerations: *harborTolerations
+    resources:
+      requests:
+        cpu: 40m
+        memory: 128Mi
+redis:
+  internal:
+    nodeSelector: *harborNodeSelector
+    tolerations: *harborTolerations
+    resources:
+      requests:
+        cpu: 20m
+        memory: 64Mi
+exporter:
+  nodeSelector: *harborNodeSelector
+  tolerations: *harborTolerations
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi

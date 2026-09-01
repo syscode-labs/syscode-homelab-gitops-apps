@@ -1,0 +1,5 @@
+# oci-lab-only chart-app: ephemeral Harbor registry/cache.
+chart: harbor
+repoURL: https://helm.goharbor.io
+version: "1.15.1"
+namespace: harbor
