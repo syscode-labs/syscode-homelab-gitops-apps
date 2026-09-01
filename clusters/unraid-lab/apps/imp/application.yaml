@@ -14,7 +14,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/syscode-labs/imp.git
-      targetRevision: v0.9.0 # v0.9.0 release
+      targetRevision: feat/imp-sandbox-api-v2 # GitHub App auth implementation
       path: charts/imp
       helm:
         releaseName: imp

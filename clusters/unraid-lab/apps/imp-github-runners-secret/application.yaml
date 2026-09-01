@@ -1,0 +1,25 @@
+# Sync the BWS GitHub runner credential into imp-system through ESO.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: unraid-lab-imp-github-runners-secret
+  namespace: argocd
+  labels:
+    syscode.io/cluster: unraid-lab
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
+    targetRevision: HEAD
+    path: clusters/unraid-lab/apps/imp-github-runners-secret/manifests
+  destination:
+    name: unraid-lab
+    namespace: imp-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
