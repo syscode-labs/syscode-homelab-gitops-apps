@@ -1,0 +1,5 @@
+# Tailscale operator is reconciled once per cluster by appset.yaml.
+chart: tailscale-operator
+repoURL: https://pkgs.tailscale.com/helmcharts
+version: "*"
+namespace: tailscale

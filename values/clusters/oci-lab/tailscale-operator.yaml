@@ -1,0 +1,6 @@
+# OCI Talos cluster identity.
+proxyConfig:
+  defaultTags:
+    - tag:k8s-operator
+    - tag:talos
+    - tag:oci-lab-talos
