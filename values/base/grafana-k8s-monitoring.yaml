@@ -40,6 +40,55 @@ destinations:
 clusterMetrics:
   enabled: true
   collector: alloy-metrics
+  # Keep the stock allow-list ON (already true by default) and layer a drop
+  # list on top, per scrape job. The goal is to stay within the Grafana Cloud
+  # free tier (10k billable series, ~5-10% headroom). Billable series is the
+  # PEAK over the billing window, so the per-pod state families (which mint +
+  # die on every pod reconcile) and raw cAdvisor are the dominant churn.
+  # Keep: workload aggregates (deployment / replicaset / statefulset /
+  # daemonset / job / node / namespace / pvc / hpa / cronjob), node-level
+  # kubelet, node-exporter, GX10/sglang, and kube_pod_container_status_restarts
+  # _total (feeds the KubePodCrashLooping alert). Drop: all other per-pod KSM
+  # state, configmap/secret (rotation churn), raw cAdvisor, and the kubelet
+  # per-pod duration histograms. The chart-generated per-pod recording rules
+  # (node_namespace_pod_container:*, namespace_workload_pod:*,
+  # cluster:namespace:pod_*) feed off these raw metrics, so they self-extinguish.
+  kube-state-metrics:
+    metricsTuning:
+      # Aggregates-only: replace the permissive stock allow-list with an
+      # explicit keep list (RE2-safe). Drops every per-pod state metric,
+      # configmap/secret rotation churn, and other KSM families we don't use.
+      # kube_pod_container_status_restarts_total is kept — it feeds the
+      # KubePodCrashLooping alert.
+      useDefaultAllowList: false
+      includeMetrics:
+        - "kube_deployment.*"
+        - "kube_replicaset.*"
+        - "kube_statefulset.*"
+        - "kube_daemonset.*"
+        - "kube_job.*"
+        - "kube_node.*"
+        - "kube_namespace_status_phase"
+        - "kube_persistentvolumeclaim.*"
+        - "kube_persistentvolume.*"
+        - "kube_horizontalpodautoscaler.*"
+        - "kube_cronjob.*"
+        - "kube_pod_container_status_restarts_total"
+        - "kube_resourcequota"
+  cadvisor:
+    metricsTuning:
+      # Raw per-container metrics. The recording-rule form carries the same
+      # signal at the node level; dropping raw cuts the biggest live family.
+      excludeMetrics:
+        - "container_.*"
+  kubelet:
+    metricsTuning:
+      # Per-pod kubelet duration histograms (pod worker / cgroup manager / pod
+      # start latency). Node-level kubelet metrics are kept.
+      excludeMetrics:
+        - "kubelet_pod_worker_duration_seconds_(bucket|sum)"
+        - "kubelet_cgroup_manager_duration_seconds_(bucket|sum)"
+        - "kubelet_pod_start_duration_seconds_(bucket|sum)"
 hostMetrics:
   enabled: true
   collector: alloy-metrics
