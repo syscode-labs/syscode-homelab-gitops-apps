@@ -1,5 +1,3 @@
 # Tags common to every cluster's Tailscale operator-managed nodes.
 proxyConfig:
-  defaultTags:
-    - tag:k8s-operator
-    - tag:talos
+  defaultTags: "tag:k8s-operator,tag:talos"
