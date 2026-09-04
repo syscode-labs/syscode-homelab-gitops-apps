@@ -8,13 +8,14 @@
 
 **Tech Stack:** Argo CD ApplicationSet (Go templating), `appset.yaml`, `AGENTS.md`, `bootstrap/argocd-cm.yaml` (already has display label), `kubectl`/`omnictl` verification.
 
-### Task 1: Write failing test for always-prefix rule
+## Task 1: Write failing test for always-prefix rule
 
 **Files:**
+
 - Create: `/tmp/tdd_appset_prefix_test.py`
 - Test: checks `appset.yaml` template name contains `{{.clusterName}}-{{.path.basename}}` and does NOT contain the old conditional `if eq .clusterName "oci-lab"`
 
-**Step 1: Write the failing test**
+### Step 1: Write the failing test
 
 ```python
 import pathlib
@@ -28,21 +29,23 @@ if __name__ == "__main__":
     test_always_prefix(); print("PASS")
 ```
 
-**Step 2: Run test to verify it fails**
+### Step 2: Run test to verify it fails
 
 Run: `python3 /tmp/tdd_appset_prefix_test.py`
 Expected: FAIL (old conditional present)
 
-**Step 3: Commit test (not yet, keep as /tmp for TDD gate)**
+### Step 3: Commit test (not yet, keep as /tmp for TDD gate)
 
-### Task 2: Update ApplicationSet template to always prefix
+## Task 2: Update ApplicationSet template to always prefix
 
 **Files:**
+
 - Modify: `/Users/giovanni/syscode/git/syscode-homelab-gitops-apps/appset.yaml:78-83`
 
-**Step 1: Edit template**
+### Step 1: Edit template
 
 Old:
+
 ```yaml
   template:
     metadata:
@@ -52,6 +55,7 @@ Old:
 ```
 
 New:
+
 ```yaml
   template:
     metadata:
@@ -61,19 +65,20 @@ New:
       name: '{{ .clusterName }}-{{ .path.basename }}'
 ```
 
-**Step 2: Run test to verify it passes**
+### Step 2: Run test to verify it passes
 
 Run: `python3 /tmp/tdd_appset_prefix_test.py`
 Expected: PASS
 
-**Step 3: Run existing related tests**
+### Step 3: Run existing related tests
 
 Run: `python3 /tmp/label_test.py && python3 /tmp/tdd_custom_labels_test.py && python3 /tmp/tdd_argocd_rbac_test.py`
 Expected: All PASS (label test must be updated — see Task 3)
 
-### Task 3: Update label-test expectations and repo rule
+## Task 3: Update label-test expectations and repo rule
 
 **Files:**
+
 - Modify: `/tmp/label_test.py` (if it asserts names) — actually label_test checks labels, not names, so no change needed
 - Modify: `/Users/giovanni/syscode/git/syscode-homelab-gitops-apps/AGENTS.md` — add rule under GitNexus or new section:
 
@@ -85,29 +90,29 @@ Expected: All PASS (label test must be updated — see Task 3)
 
 Or create `.claude/skills/app-naming/SKILL.md` with same rule if a skills dir is preferred.
 
-**Step 1: Edit AGENTS.md**
+### Step 1: Edit AGENTS.md
 
 Add after GitNexus section.
 
-**Step 2: Verify no stale references**
+### Step 2: Verify no stale references
 
 Run: `grep -R "oci-lab-{{" appset.yaml` should be gone; `grep -R "unraid-lab-cilium" docs/` should appear only in plan.
 
-### Task 4: Verify migration impact and sync
+## Task 4: Verify migration impact and sync
 
 **Files:** none — operational verification
 
-**Step 1: Render and diff**
+### Step 1: Render and diff
 
 Run: `git diff appset.yaml`
 
 Expected: single hunk, name line change + comment
 
-**Step 2: Predict Argo behavior**
+### Step 2: Predict Argo behavior
 
 - Old unprefixed apps (`cilium`, `cert-manager`, `radar`, etc. on `unraid-lab`) will be pruned (automated prune:true) and recreated as `unraid-lab-cilium`, etc. Helm `releaseName` unchanged, so chart resources are not deleted — only the Application CR is renamed. Verify by checking `spec.sources[0].helm.releaseName` is still `{{.path.basename}}` (unchanged).
 
-**Step 3: Push and force-sync ApplicationSet**
+### Step 3: Push and force-sync ApplicationSet
 
 ```bash
 git add appset.yaml AGENTS.md
@@ -119,7 +124,7 @@ kubectl -n argocd patch applicationset apps --type merge -p '{"metadata":{"annot
 
 Observe `kubectl -n argocd get applications --no-headers | grep -E "cilium|cert-manager|radar"` should show `unraid-lab-*` and `oci-lab-*` pairs, old names gone.
 
-### Task 5: Final verification-before-completion
+## Task 5: Final verification-before-completion
 
 **Run:**
 
@@ -132,4 +137,3 @@ kubectl -n argocd get applications -o custom-columns=NAME:.metadata.name,CLUSTER
 ```
 
 Expected: Both `unraid-lab-cilium` and `oci-lab-cilium` present, old `cilium` absent after prune.
-

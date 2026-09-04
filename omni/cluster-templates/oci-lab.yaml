@@ -10,7 +10,7 @@ kubernetes:
   version: v1.36.3
 talos:
   # Keep in step with installImage in omni/machine-classes/*.yaml.
-  version: v1.13.9
+  version: v1.14.0
 # Patches live in the sibling patches/ directory, so paths no longer traverse
 # upward and no `--allowed-dir` flag is needed. `status` now works without it.
 patches:
