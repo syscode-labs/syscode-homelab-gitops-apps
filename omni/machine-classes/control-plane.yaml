@@ -4,7 +4,7 @@ metadata:
   type: MachineClasses.omni.sidero.dev
   id: oci-cp
 spec:
-  installImage: ghcr.io/syscode-labs/talos-images/installer:v1.13.9
+  installImage: ghcr.io/syscode-labs/talos-images/installer:v1.14.0
   # Omni's MachineClass spec takes `matchlabels` (lowercase) as a LIST of
   # label selector strings. It was written as a camelCase map, which Omni
   # rejects with "machine class should either have auto provision or match
