@@ -5,6 +5,12 @@ on:
     types: [closed]
     paths:
       - omni/versions.yaml
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact merge SHA of an already-approved, merged versions.yaml PR.
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -12,12 +18,42 @@ permissions:
 
 jobs:
   dispatch:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    if: >-
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main') ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    env:
+      SOURCE_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.source_sha || github.event.pull_request.merge_commit_sha }}
     steps:
+      - name: Verify a manual replay names an approved versions source
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+
+          sha = os.environ['SOURCE_SHA']
+          if not re.fullmatch(r'[0-9a-f]{40}', sha):
+              raise SystemExit('source_sha must be a lowercase 40-character SHA')
+          def api(path):
+              return json.loads(subprocess.check_output(['gh', 'api', path], text=True))
+          api(f'repos/{os.environ["GITHUB_REPOSITORY"]}/commits/{sha}')
+          prs = api(f'repos/{os.environ["GITHUB_REPOSITORY"]}/commits/{sha}/pulls')
+          approved = [pr for pr in prs if pr.get('base', {}).get('ref') == 'main' and pr.get('merged_at')]
+          if not approved:
+              raise SystemExit('source SHA is not associated with a merged main PR')
+          if not any(any(f.get('filename') == 'omni/versions.yaml' for f in api(f'repos/{os.environ["GITHUB_REPOSITORY"]}/pulls/{pr["number"]}/files')) for pr in approved):
+              raise SystemExit('source SHA is not associated with a merged versions.yaml PR')
+          PY
+
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: ${{ env.SOURCE_SHA }}
 
       - uses: actions/create-github-app-token@v2
         id: app-token
@@ -30,8 +66,8 @@ jobs:
       - name: Dispatch sanitized release request
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          SOURCE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
-          RELEASE_ID: talos-${{ github.event.pull_request.merge_commit_sha }}
+          SOURCE_SHA: ${{ env.SOURCE_SHA }}
+          RELEASE_ID: talos-${{ env.SOURCE_SHA }}
         run: |
           set -euo pipefail
           python3 - <<'PY' > dispatch.json
