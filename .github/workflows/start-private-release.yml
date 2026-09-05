@@ -1,0 +1,57 @@
+name: Start private Talos release controller
+
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - omni/versions.yaml
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  dispatch:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_CONTROLLER_APP_ID }}
+          private-key: ${{ secrets.RELEASE_CONTROLLER_APP_PRIVATE_KEY }}
+          owner: syscode-labs
+          repositories: talos-release-controller
+
+      - name: Dispatch sanitized release request
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          SOURCE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          RELEASE_ID: talos-${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > dispatch.json
+          import json, os
+          versions = {}
+          current = None
+          for line in open('omni/versions.yaml', encoding='utf-8'):
+              if line.startswith('talos: '):
+                  versions['talos_version'] = line.split(':', 1)[1].strip()
+              elif line.startswith('kubernetes: '):
+                  versions['kubernetes_version'] = line.split(':', 1)[1].strip()
+          if not versions.get('talos_version') or not versions.get('kubernetes_version'):
+              raise SystemExit('global Talos/Kubernetes pins are required')
+          payload = {
+              'release_id': os.environ['RELEASE_ID'],
+              'source_repo': 'syscode-labs/syscode-homelab-gitops-apps',
+              'source_sha': os.environ['SOURCE_SHA'],
+              **versions,
+          }
+          print(json.dumps({'event_type': 'talos-release-start', 'client_payload': payload}))
+          PY
+          gh api repos/syscode-labs/talos-release-controller/dispatches \
+            --method POST --input dispatch.json
