@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talos Release Coordinator — Design Artifact</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" integrity="sha384-en/ztfPSRkGfME4KIm05joYXynqzUgbsG5nMrj/xEFAHXkeZfO3yMK8QQ+mP7p1/" crossorigin="anonymous"></script>
+  <style>
+    :root { --bg:#020617; --panel:#0b1222; --panel2:#111b30; --line:#263653; --muted:#8ea0bd; --text:#e7eefb; --cyan:#22d3ee; --green:#34d399; --amber:#fbbf24; --violet:#a78bfa; --rose:#fb7185; --orange:#fb923c; --mono:'JetBrains Mono',ui-monospace,monospace; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+    body { margin:0; padding:28px; color:var(--text); background:var(--bg); font-family:var(--mono); font-size:13px; }
+    .container { max-width:1380px; margin:0 auto; }
+    .header { display:flex; align-items:flex-start; gap:14px; padding:4px 0 24px; }
+    .pulse { width:12px; height:12px; margin-top:9px; border-radius:50%; background:var(--cyan); box-shadow:0 0 18px #22d3ee88; animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.42} }
+    h1 { margin:0; font-size:25px; letter-spacing:-.05em; }
+    .subtitle { margin:7px 0 0; color:var(--muted); font-size:12px; line-height:1.6; }
+    .toolbar { margin-left:auto; display:flex; align-items:center; gap:8px; }
+    .toolbar-toggle { color:#64748b; background:transparent; border:0; cursor:pointer; font:inherit; font-size:21px; }
+    .toolbar-actions { display:none; gap:6px; }
+    .toolbar.expanded .toolbar-actions { display:flex; }
+    button { font-family:inherit; }
+    .toolbar-actions button,.copy { padding:7px 10px; color:#cbd5e1; background:#17243a; border:1px solid #314462; border-radius:6px; cursor:pointer; font-size:10px; }
+    .toolbar-actions button:hover,.copy:hover { color:#fff; border-color:var(--cyan); }
+    .layout { display:grid; grid-template-columns:205px minmax(0,1fr); gap:22px; align-items:start; }
+    .sidebar { position:sticky; top:18px; padding:15px 12px; background:rgba(11,18,34,.85); border:1px solid var(--line); border-radius:12px; }
+    .sidebar-label { margin:0 8px 12px; color:#64748b; font-size:10px; text-transform:uppercase; letter-spacing:.12em; }
+    .sidebar a { display:block; padding:9px 8px; color:var(--muted); text-decoration:none; border-left:2px solid transparent; font-size:11px; }
+    .sidebar a:hover { color:#fff; border-left-color:var(--cyan); background:#132139; }
+    main { min-width:0; }
+    section { scroll-margin-top:20px; margin-bottom:22px; padding:21px; background:rgba(11,18,34,.68); border:1px solid var(--line); border-radius:14px; }
+    .section-head { display:flex; align-items:baseline; justify-content:space-between; gap:15px; margin-bottom:16px; }
+    h2 { margin:0; font-size:16px; letter-spacing:-.03em; }
+    h3 { margin:0 0 10px; font-size:12px; }
+    .eyebrow { color:var(--cyan); font-size:10px; text-transform:uppercase; letter-spacing:.12em; }
+    .lede { max-width:82ch; margin:0 0 17px; color:#b6c4da; line-height:1.65; font-size:12px; }
+    .refs { margin:0 0 17px; padding:10px 12px; color:#a8bad4; background:#081222; border:1px solid #223653; border-left:2px solid var(--cyan); border-radius:6px; font-size:10px; line-height:1.7; }
+    .refs b { color:#e0f2fe; font-weight:600; }
+    .refs code { color:#c4b5fd; }
+    .explain { margin:0 0 17px; padding:11px 13px; color:#d6e1f2; background:#0d1a2d; border:1px solid #2d4364; border-left:2px solid var(--green); border-radius:6px; font-size:11px; line-height:1.65; }
+    .explain b { color:#86efac; font-weight:600; }
+    .diagram { padding:10px; overflow:auto; border:1px solid #1b2a43; border-radius:10px; background:#07101f; }
+    svg { display:block; width:100%; min-width:940px; }
+    .grid2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .grid3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .card { padding:15px; background:var(--panel2); border:1px solid #2a3c5d; border-radius:9px; }
+    .card p,.card li { color:var(--muted); font-size:11px; line-height:1.65; }
+    .card p { margin:0; }
+    ul { margin:0; padding-left:17px; }
+    .tag { display:inline-block; padding:3px 6px; border-radius:4px; font-size:9px; color:#bae6fd; background:#083344; border:1px solid #155e75; }
+    .tag.green { color:#bbf7d0; background:#052e25; border-color:#047857; }
+    .tag.amber { color:#fde68a; background:#35230a; border-color:#92400e; }
+    .tag.violet { color:#ddd6fe; background:#211646; border-color:#6d28d9; }
+    .entity { border-left:3px solid var(--violet); }
+    .entity.source { border-left-color:var(--violet); }
+    .entity.derived { border-left-color:var(--green); }
+    .entity.external { border-left-color:var(--amber); }
+    .entity h3 { display:flex; justify-content:space-between; gap:8px; }
+    .field { display:grid; grid-template-columns:145px 1fr; gap:8px; padding:5px 0; border-top:1px solid #22314b; font-size:10px; }
+    .field:first-of-type { border-top:0; }
+    .field b { color:#dbeafe; font-weight:500; }
+    .field span { color:var(--muted); }
+    .code-wrap { position:relative; }
+    pre { overflow:auto; margin:0; padding:16px; color:#c8d7ed; background:#050b16; border:1px solid #263653; border-radius:8px; font:11px/1.65 var(--mono); white-space:pre-wrap; overflow-wrap:anywhere; }
+    .copy { position:absolute; top:8px; right:8px; color:#8ea0bd; background:#101c31; }
+    .kw { color:#f0abfc; } .key { color:#67e8f9; } .str { color:#86efac; } .comment { color:#64748b; }
+    .flow { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; align-items:stretch; }
+    .step { position:relative; padding:13px 10px; min-height:100px; background:#0f1a2d; border:1px solid #2a3c5d; border-radius:8px; }
+    .step:not(:last-child)::after { content:'→'; position:absolute; right:-13px; top:39px; z-index:2; color:var(--cyan); font-size:17px; }
+    .num { color:var(--cyan); font-size:10px; }
+    .step strong { display:block; margin:8px 0 7px; color:#fff; font-size:11px; }
+    .step span { color:var(--muted); font-size:9px; line-height:1.55; }
+    details { margin-top:12px; border-top:1px solid #263653; }
+    summary { padding:12px 0 0; color:#c4b5fd; cursor:pointer; font-size:11px; }
+    .note { margin-top:11px; padding:11px 13px; color:#b6c4da; background:#0a1425; border-left:2px solid var(--orange); font-size:11px; line-height:1.65; }
+    .footer { padding:3px 0 12px; color:#52627e; text-align:center; font-size:10px; }
+    @media (max-width:900px) { body{padding:16px}.layout{grid-template-columns:1fr}.sidebar{position:static;display:flex;gap:5px;overflow:auto}.sidebar-label{display:none}.sidebar a{white-space:nowrap;border-left:0;border-bottom:2px solid transparent}.sidebar a:hover{border-left:0;border-bottom-color:var(--cyan)}.grid3,.grid2{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.step:not(:last-child)::after{content:'↓';right:auto;top:auto;bottom:-15px;left:50%} }
+    @media print { .toolbar,.sidebar{display:none!important}.layout{display:block} section{break-inside:avoid}.diagram{overflow:visible} }
+  </style>
+</head>
+<body>
+<div class="container" id="report-container">
+  <header class="header">
+    <div class="pulse"></div>
+    <div><h1>Talos Release Coordinator</h1><p class="subtitle">Engineer-facing design for the real reconcile/build-then-pin flow, its machine-written ledger, and the proposed downstream automation seam.</p></div>
+    <div class="toolbar"><div class="toolbar-actions"><button onclick="copyAsImage(this)">📋 Copy</button><button onclick="downloadPNG(this)">🖼️ PNG</button><button onclick="downloadPDF(this)">📄 PDF</button></div><button class="toolbar-toggle" onclick="this.parentElement.classList.toggle('expanded')" title="Export options" aria-label="Export options">⋯</button></div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" aria-label="Artifact sections"><p class="sidebar-label">Design map</p><a href="#overview">01 / Overview</a><a href="#entities">02 / Entities</a><a href="#lifecycle">03 / Lifecycle</a><a href="#recovery">04 / Recovery</a><a href="#contracts">05 / Contracts</a><a href="#invariants">06 / Invariants</a></nav>
+    <main>
+      <section id="overview">
+        <div class="section-head"><div><div class="eyebrow">System boundary</div><h2>One source, two image paths</h2></div><span class="tag">base + libvirt/QEMU · standard</span></div>
+        <p class="lede">There are two release paths after the shared version check. <b>Unraid</b> uses the base Talos image plus the <b>-libvirt</b> variant and <b>libvirt/QEMU</b> provider settings. <b>OCI</b> uses the standard installer and the OCI disk artifact. A pin to an already-built version runs <b>reconcile.yml</b>; a missing version stops there until <b>talos-images</b> builds the artifacts and writes the machine-owned ledger.</p>
+        <div class="refs"><b>Implemented in</b><br><code>syscode-homelab-gitops-apps/omni/versions.yaml</code> — desired pins<br><code>syscode-homelab-gitops-apps/.github/workflows/reconcile.yml</code> — re-pin reconciliation<br><code>syscode-homelab-gitops-apps/scripts/check-version-drift.py</code> — write guard and OCI drift check<br><code>talos-images/.github/workflows/build.yml</code> — installer, OCI image, ledger update, and GitOps PR<br><code>omni-on-unraid/scripts/resolve-cluster-versions.sh</code> + <code>omni-on-unraid/devbox.json</code> — Unraid version resolution and render commands</div>
+        <div class="diagram">
+          <svg viewBox="0 0 1160 600" role="img" aria-label="Detailed release coordinator architecture">
+            <defs><pattern id="g" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#182945" stroke-width=".6"/></pattern><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#64748b"/></marker><marker id="c" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#22d3ee"/></marker><marker id="e" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#34d399"/></marker></defs>
+            <rect width="1160" height="600" fill="url(#g)"/>
+            <!-- connections first -->
+            <path d="M580 115V155" fill="none" stroke="#22d3ee" stroke-width="2" marker-end="url(#c)"/><path d="M480 260L205 300" fill="none" stroke="#fbbf24" stroke-width="2" marker-end="url(#a)"/><path d="M680 260L955 300" fill="none" stroke="#fbbf24" stroke-width="2" marker-end="url(#a)"/><path d="M220 430L375 460" fill="none" stroke="#34d399" stroke-width="2" marker-end="url(#e)"/><path d="M940 430L785 460" fill="none" stroke="#34d399" stroke-width="2" marker-end="url(#e)"/><path d="M375 510V535" fill="none" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="6 5" marker-end="url(#a)"/><path d="M785 510V535" fill="none" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="6 5" marker-end="url(#a)"/>
+            <!-- source -->
+            <rect x="360" y="24" width="440" height="91" rx="9" fill="#10142d" stroke="#a78bfa" stroke-width="1.5"/><text x="580" y="53" fill="#fff" text-anchor="middle" font-size="14" font-weight="700">syscode-homelab-gitops-apps</text><text x="580" y="75" fill="#c4b5fd" text-anchor="middle" font-size="11">omni/versions.yaml</text><text x="580" y="96" fill="#94a3b8" text-anchor="middle" font-size="9">VersionPin + ClusterOverride records</text>
+            <!-- coordinator -->
+            <rect x="430" y="155" width="300" height="105" rx="9" fill="#0b2635" stroke="#22d3ee" stroke-width="1.5"/><text x="580" y="185" fill="#fff" text-anchor="middle" font-size="14" font-weight="700">reconcile.yml + ci.yml</text><text x="580" y="207" fill="#94a3b8" text-anchor="middle" font-size="9">push path · drift checker · scope guard</text><text x="580" y="230" fill="#67e8f9" text-anchor="middle" font-size="10">resolve → validate → write derived state</text><text x="580" y="248" fill="#fb7185" text-anchor="middle" font-size="8">new versions intentionally stop here</text>
+            <!-- shared build -->
+            <rect x="55" y="300" width="300" height="130" rx="9" fill="#092d29" stroke="#34d399" stroke-width="1.5"/><text x="205" y="332" fill="#fff" text-anchor="middle" font-size="14" font-weight="700">talos-images/build.yml</text><text x="205" y="353" fill="#94a3b8" text-anchor="middle" font-size="9">shared base + platform variant</text><text x="205" y="376" fill="#86efac" text-anchor="middle" font-size="10">standard installer:vX.Y.Z</text><text x="205" y="394" fill="#86efac" text-anchor="middle" font-size="10">+ libvirt/QEMU installer</text><text x="205" y="412" fill="#fbbf24" text-anchor="middle" font-size="9">OCI disk + rewrite talos-image.yaml</text>
+            <!-- OCI path -->
+            <rect x="805" y="300" width="300" height="130" rx="9" fill="#2d210d" stroke="#fbbf24" stroke-width="1.5"/><text x="955" y="332" fill="#fff" text-anchor="middle" font-size="14" font-weight="700">OCI path · standard</text><text x="955" y="355" fill="#fcd34d" text-anchor="middle" font-size="10">standard installer + OCI disk</text><text x="955" y="379" fill="#94a3b8" text-anchor="middle" font-size="9">GitOps machine classes</text><text x="955" y="398" fill="#94a3b8" text-anchor="middle" font-size="9">standard image reference</text><text x="955" y="416" fill="#fb7185" text-anchor="middle" font-size="8">derived state checked by CI</text>
+            <!-- PRs -->
+            <rect x="275" y="460" width="200" height="50" rx="7" fill="#10283a" stroke="#34d399"/><text x="375" y="482" fill="#fff" text-anchor="middle" font-size="10" font-weight="600">Unraid path</text><text x="375" y="498" fill="#94a3b8" text-anchor="middle" font-size="8">base + libvirt/QEMU · CLI hand-off</text><rect x="685" y="460" width="200" height="50" rx="7" fill="#10283a" stroke="#34d399"/><text x="785" y="482" fill="#fff" text-anchor="middle" font-size="10" font-weight="600">OCI GitOps state</text><text x="785" y="498" fill="#94a3b8" text-anchor="middle" font-size="8">machine classes / cluster templates</text>
+            <!-- repos -->
+            <rect x="85" y="535" width="290" height="43" rx="7" fill="#1f1b16" stroke="#fbbf24"/><text x="230" y="561" fill="#fcd34d" text-anchor="middle" font-size="10">Unraid / QEMU / custom libvirt</text><rect x="785" y="535" width="290" height="43" rx="7" fill="#1f1b16" stroke="#fbbf24"/><text x="930" y="561" fill="#fcd34d" text-anchor="middle" font-size="10">OCI / standard Talos path</text>
+            <text x="595" y="140" fill="#22d3ee" text-anchor="middle" font-size="8">push to main: versions.yaml</text><text x="350" y="286" fill="#fbbf24" text-anchor="middle" font-size="8">build shared base + variants</text><text x="815" y="286" fill="#fbbf24" text-anchor="middle" font-size="8">standard path</text><text x="580" y="595" fill="#fb7185" text-anchor="middle" font-size="8">PR checks and human merge gates</text>
+          </svg>
+        </div>
+        <div class="explain"><b>Plain explanation.</b> The build makes one shared base and two usable forms. OCI takes the standard form and its OCI disk. Unraid takes the base with the libvirt/QEMU form and the libvirt provider setting. They start from the same version card, but they do not consume the same installer reference.</div>
+      </section>
+
+      <section id="entities">
+        <div class="section-head"><div><div class="eyebrow">Data model</div><h2>Entity relationships</h2></div><span class="tag violet">source → projection</span></div>
+        <p class="lede">The key design choice is to keep desired state, build output, and consumer configuration as different entities. A version pin does not itself prove that an artifact exists. An artifact does not decide which platform consumes it. The cards below distinguish repository-backed records from conceptual groupings used to explain the flow.</p>
+        <div class="refs"><b>Repository-backed records</b><br><code>syscode-homelab-gitops-apps/omni/versions.yaml</code> — hand-owned intent<br><code>syscode-homelab-gitops-apps/omni/talos-image.yaml</code> — build ledger<br><code>syscode-homelab-gitops-apps/omni/machine-classes/control-plane.yaml</code>, <code>worker.yaml</code> — OCI install image references<br><code>syscode-homelab-gitops-apps/omni/cluster-templates/oci-lab.yaml</code> — OCI cluster version fields<br><code>omni-on-unraid/omni/machine-classes/control-plane.yaml</code>, <code>worker.yaml</code>, <code>tiny.yaml</code>, <code>management.yaml</code> — Unraid libvirt classes</div>
+        <div class="grid3">
+          <article class="card entity source"><h3>VersionPin <span class="tag violet">canonical</span></h3><div class="field"><b>talos</b><span>v1.14.0</span></div><div class="field"><b>kubernetes</b><span>v1.36.3</span></div><div class="field"><b>clusters[name]</b><span>optional override</span></div><div class="field"><b>owns</b><span>desired release state</span></div></article>
+          <article class="card entity derived"><h3>BuildRun <span class="tag green">conceptual</span></h3><div class="field"><b>request.version</b><span>exact pin from source</span></div><div class="field"><b>status</b><span>queued → built → failed</span></div><div class="field"><b>produces</b><span>one ArtifactSet</span></div><div class="field"><b>idempotency key</b><span>version + extension digest</span></div></article>
+          <article class="card entity derived"><h3>ArtifactSet <span class="tag green">conceptual</span></h3><div class="field"><b>standard</b><span>installer:vX.Y.Z</span></div><div class="field"><b>libvirt</b><span>installer:vX.Y.Z-libvirt</span></div><div class="field"><b>oci</b><span>OCID + object metadata</span></div><div class="field"><b>ledger</b><span>digests / schematic IDs</span></div></article>
+          <article class="card entity external"><h3>ConsumerProjection <span class="tag amber">conceptual</span></h3><div class="field"><b>consumer</b><span>OCI or Unraid</span></div><div class="field"><b>selector</b><span>standard / libvirt</span></div><div class="field"><b>rendered refs</b><span>machine classes / patches</span></div><div class="field"><b>source</b><span>ArtifactSet + VersionPin</span></div></article>
+          <article class="card entity external"><h3>DownstreamPR <span class="tag amber">implemented for OCI</span></h3><div class="field"><b>repository</b><span>syscode-homelab-gitops-apps</span></div><div class="field"><b>branch</b><span>talos/upgrade-${TALOS_VERSION}</span></div><div class="field"><b>changes</b><span>ledger + OCI files</span></div><div class="field"><b>creation</b><span>talos-images build.yml</span></div></article>
+          <article class="card entity derived"><h3>TalosImageLedger <span class="tag green">machine-owned</span></h3><div class="field"><b>file</b><span>omni/talos-image.yaml</span></div><div class="field"><b>writes</b><span>talos-images build</span></div><div class="field"><b>records</b><span>schematic IDs + OCID</span></div><div class="field"><b>readers</b><span>CI / derived renderers</span></div></article>
+          <article class="card entity source"><h3>ProviderBinding <span class="tag violet">platform rule</span></h3><div class="field"><b>unraid</b><span>providerid: libvirt</span></div><div class="field"><b>oci</b><span>no libvirt provider</span></div><div class="field"><b>image rule</b><span>platform-specific selector</span></div><div class="field"><b>not owned by</b><span>generic image build</span></div></article>
+        </div>
+        <details><summary>Relationship rules</summary><div class="note"><b>VersionPin 1→N BuildRun:</b> retries and extension changes can create multiple runs, but only a successful run can produce a ledger. <b>BuildRun 1→1 TalosImageLedger:</b> the image build is the single writer of schematic IDs, OCIDs, and extension metadata. <b>Ledger → derived state:</b> CI checks that rendered machine classes match intent. <b>Unraid is not yet a downstream PR:</b> its renderer requires an explicit <code>--talos-version</code> CLI input.</div></details>
+        <div class="explain"><b>Plain explanation.</b> These are not all database tables. Only the files named above are repository records. The other cards are labels for things that happen during the flow: choose a version, build images, record the result, and place the right image reference in each platform’s configuration.</div>
+      </section>
+
+      <section id="lifecycle">
+        <div class="section-head"><div><div class="eyebrow">State machine</div><h2>Release lifecycle and failure boundaries</h2></div><span class="tag green">observable transitions</span></div>
+        <div class="flow"><div class="step"><div class="num">01 / SOURCE</div><strong>Pin changes</strong><span>Human intent lives in versions.yaml. A push starts reconcile.yml.</span></div><div class="step"><div class="num">02 / GUARD</div><strong>Reconcile checks</strong><span>Built tag? Write derived state. Missing tag? Stop by design.</span></div><div class="step"><div class="num">03 / BUILD</div><strong>Build then pin</strong><span>talos-images resolves explicit input, builds both tags and the OCI disk.</span></div><div class="step"><div class="num">04 / LEDGER</div><strong>Ledger rewritten</strong><span>talos-image.yaml records schematic, OCID, extension version and digests.</span></div><div class="step"><div class="num">05 / APPLY</div><strong>Checks + merge</strong><span>GitOps CI validates drift. Unraid currently consumes the version through CLI.</span></div></div>
+        <div class="refs"><b>Workflow references</b><br><code>syscode-homelab-gitops-apps/.github/workflows/reconcile.yml</code> — push on <code>omni/versions.yaml</code>, run <code>check-version-drift.py --write</code>, commit derived OCI files<br><code>syscode-homelab-gitops-apps/.github/workflows/ci.yml</code> — manifest, drift, and Kubernetes API checks<br><code>talos-images/.github/workflows/build.yml</code> — <code>repository_dispatch: firecracker-release</code>, image build, OCI import, ledger write, and PR creation<br><code>omni-on-unraid/scripts/resolve-cluster-versions.sh</code> — read and validate the shared version source</div>
+        <div class="grid2" style="margin-top:14px"><div class="card"><h3 style="color:var(--rose)">New-version failure</h3><p>The source pin is not treated as a request to build an unknown tag. The drift checker stops before writing nonexistent references. A dispatch to talos-images with an explicit version builds the missing artifact; the version is then pinned in the GitOps source.</p></div><div class="card"><h3 style="color:var(--amber)">Consumer boundary</h3><p>OCI derived state is checked by GitOps CI. Unraid is a separate repository and currently requires the resolved version to be passed to its renderer through the CLI. Automating that edge is a future coordinator seam.</p></div></div>
+        <div class="explain"><b>Plain explanation.</b> The important stop is before configuration is written. A missing image is not silently treated as present. That leaves the version unchanged until a build has produced the required artifact. The OCI path is checked automatically; the Unraid path still needs its version supplied to the renderer.</div>
+      </section>
+
+      <section id="recovery">
+        <div class="section-head"><div><div class="eyebrow">Recovery boundary</div><h2>Attempt correlation, not permanent claims</h2></div><span class="tag amber">target design · unverified</span></div>
+        <p class="lede">The current release path has an observed recovery gap: a receiver can persist a duplicate-prevention claim before mutation, while the controller records a provider dispatch as <code>sent</code> only when it accepts a callback. An interrupted execution or lost callback can therefore leave the release pending even though replay is refused. A duplicate response is evidence that a claim exists—not evidence that mutation never happened, nor that the release has reached a terminal state.</p>
+        <div class="refs"><b>Status and evidence</b><br><b>Verified current behavior (2026-09-05):</b> <code>omni-on-unraid/.github/workflows/release-dispatch.yml</code> persists a claim before mutation and rejects cache-hit replay; <code>talos-release-controller/release/coordinator.py</code> marks a provider dispatch <code>sent</code> on accepted callback. Revalidate OCI receiver behavior from remote <code>main</code> before implementation.<br><b>Canonical open task:</b> <a href="https://github.com/syscode-labs/syscode-homelab-gitops-apps/issues/70">Recover Talos release dispatches with durable attempt correlation</a>, a child of <a href="https://github.com/syscode-labs/syscode-homelab-gitops-apps/issues/62">Wayfinder: Talos v1.14.0 release through versions.yaml</a>.<br><b>Supporting record:</b> <code>syscode-ai-internal-plans/docs/research/2026-09-05-talos-release-recovery-findings.md</code>. These findings are diagnosis and proposed acceptance criteria, not implementation or cluster-health proof.</div>
+        <div class="flow"><div class="step"><div class="num">01 / DURABLE IDENTITY</div><strong>Keep the accepted release</strong><span>Preserve approved source SHA, release ID, accepted build run, and exact immutable artifacts.</span></div><div class="step"><div class="num">02 / ATTEMPT EVIDENCE</div><strong>Correlate an attempt</strong><span>Associate each provider attempt with authenticated workflow/run evidence; a receiver claim is not that correlation.</span></div><div class="step"><div class="num">03 / OBSERVE</div><strong>Running is non-mutating</strong><span>Observe a correlated active run. Do not dispatch a competing destructive mutation.</span></div><div class="step"><div class="num">04 / RECOVER ONCE</div><strong>Finished has a result</strong><span>Recover the authentic terminal result once. Retry only when failure before mutation is proven.</span></div><div class="step"><div class="num">05 / FAIL CLOSED</div><strong>Uncertain is blocked</strong><span>Record a concrete inspection-required outcome; never silently hang or delete a claim to force progress.</span></div></div>
+        <div class="grid2" style="margin-top:14px"><div class="card"><h3 style="color:var(--rose)">Current defect — verified</h3><ul><li>Claim-before-mutation plus replay refusal protects against repeat destruction, but does not itself provide recovery.</li><li>Missing callback is not proof that execution never happened.</li><li>A successful replay workflow is not proof of release progress.</li></ul></div><div class="card"><h3 style="color:var(--green)">Target recovery semantics — proposed</h3><ul><li>Use bounded, durable attempt/run correlation and authenticated evidence.</li><li>Preserve success during partial provider failure; consider recovery only for unfinished work.</li><li>Recover completed builds/deployments without rebuilding or mutation when their callbacks were lost.</li></ul></div></div>
+        <div class="note"><b>Acceptance remains open.</b> The linked task must demonstrate lost build callback with zero rebuilds; claim-before-child interruption; duplicate delivery while original execution is running; lost deployment callback; partial success; and an explicit blocked uncertain-mutation outcome. It also retains the settled boundary: native <code>github-runner.service</code>, explicitly approved Docker group, service-account-only automation, source-PR merge as the sole approval, no same-host SSH/root wrapper, no local Terraform/OpenTofu, and existing OCI exact-plan/Always-Free gates.</div>
+        <div class="explain"><b>Plain explanation.</b> A “duplicate” answer says only that the receiver has seen this release. Recovery first finds the real correlated run, then observes it or applies its authenticated result. If nobody can prove what was mutated, the release stops visibly for inspection rather than guessing.</div>
+      </section>
+
+      <section id="contracts">
+        <div class="section-head"><div><div class="eyebrow">Implementation contract</div><h2>What the workflows actually exchange</h2></div><span class="tag">executable shape</span></div>
+<div class="refs"><b>Workflow and source references</b><br><code>syscode-homelab-gitops-apps/omni/versions.yaml</code> — input read by the build workflow<br><code>talos-images/.github/workflows/build.yml</code> lines 53–88 — Talos version resolution; lines 181–242 — standard and libvirt installers; lines 488–619 — OCI disk import; lines 632–743 — ledger write and PR creation<br><code>syscode-homelab-gitops-apps/omni/talos-image.yaml</code> — output record format<br><code>omni-on-unraid/devbox.json</code> — render commands; <code>omni-on-unraid/scripts/resolve-cluster-versions.sh</code> — version resolution</div>
+        <div class="grid2">
+          <div><h3>Canonical source</h3><div class="code-wrap"><button class="copy" onclick="copyCode(this)">copy</button><pre><span class="key">talos</span>: <span class="str">v1.14.0</span>
+<span class="key">kubernetes</span>: <span class="str">v1.36.3</span>
+<span class="key">clusters</span>:
+  <span class="key">unraid-lab</span>:
+    <span class="key">talos</span>: <span class="str">v1.14.0</span>
+    <span class="key">kubernetes</span>: <span class="str">v1.36.3</span></pre></div></div>
+          <div><h3>Release request</h3><div class="code-wrap"><button class="copy" onclick="copyCode(this)">copy</button><pre><span class="comment"># POST /repos/.../talos-images/dispatches</span>
+{
+  <span class="key">"event_type"</span>: <span class="str">"firecracker-release"</span>,
+  <span class="key">"client_payload"</span>: {
+    <span class="key">"talos_version"</span>: <span class="str">"v1.14.0"</span>,
+    <span class="key">"firecracker_version"</span>: <span class="str">"v1.9.0"</span>
+  }
+}</pre></div></div>
+          <div><h3>Build outputs</h3><div class="code-wrap"><button class="copy" onclick="copyCode(this)">copy</button><pre><span class="comment"># values written by talos-images/.github/workflows/build.yml</span>
+<span class="key">INSTALLER_IMAGE</span>: ghcr.io/syscode-labs/talos-images/installer:<span class="str">&lt;TALOS_VERSION&gt;</span>
+<span class="key">INSTALLER_IMAGE</span>: ghcr.io/syscode-labs/talos-images/installer:<span class="str">&lt;TALOS_VERSION&gt;</span>-libvirt
+<span class="key">IMAGE_OCID</span>: <span class="str">&lt;OCI image OCID&gt;</span>
+<span class="key">omni/talos-image.yaml</span>: <span class="str">&lt;ledger fields written at lines 653–664&gt;</span></pre></div></div>
+          <div><h3>Consumer selection</h3><div class="code-wrap"><button class="copy" onclick="copyCode(this)">copy</button><pre><span class="comment"># omni-on-unraid/omni/machine-classes/control-plane.yaml</span>
+<span class="key">installImage</span>: ghcr.io/syscode-labs/talos-images/installer:<span class="str">&lt;TALOS_VERSION&gt;</span>-libvirt
+<span class="key">autoprovision.providerid</span>: libvirt
+
+<span class="comment"># syscode-homelab-gitops-apps/omni/machine-classes/control-plane.yaml</span>
+<span class="key">installImage</span>: ghcr.io/syscode-labs/talos-images/installer:<span class="str">&lt;TALOS_VERSION&gt;</span>
+<span class="key">selection</span>: OCI machine class fields in this file</pre></div></div>
+        </div>
+        <details><summary>Dispatch trigger implemented in talos-images</summary><div class="note"><b>talos-images/.github/workflows/build.yml</b> declares <code>repository_dispatch</code> with type <code>firecracker-release</code>. It reads <code>github.event.client_payload.talos_version</code> and <code>firecracker_version</code> when provided. The workflow also supports <code>workflow_dispatch</code>, weekly schedule, and reads the GitOps repository's <code>omni/versions.yaml</code>. The credential used to create the GitOps PR is named <code>TALOS_GITOPS_DISPATCH_TOKEN</code>; its token type is not specified in this repository.</div></details>
+        <div class="explain"><b>Plain explanation.</b> The source file contains the desired versions. The dispatch carries the two inputs that the build workflow accepts. The build produces installer tags and an OCI image. The workflow then writes the ledger and opens or updates the GitOps pull request. The Unraid repository is not written by that workflow.</div>
+      </section>
+
+      <section id="invariants">
+        <div class="section-head"><div><div class="eyebrow">Implemented rules</div><h2>Version and image-selection constraints</h2></div><span class="tag amber">repository-backed</span></div>
+        <div class="refs"><b>Enforcement references</b><br><code>syscode-homelab-gitops-apps/scripts/check-version-drift.py</code> — compares OCI files with <code>omni/versions.yaml</code> and checks installer tags in GHCR<br><code>talos-images/.github/workflows/build.yml</code> lines 144–209 — separate common and libvirt schematics and installer builds; lines 681–703 — OCI file updates<br><code>omni-on-unraid/omni/machine-classes/control-plane.yaml</code>, <code>worker.yaml</code> — libvirt image and provider selection<br><code>omni-on-unraid/scripts/resolve-cluster-versions.sh</code> — cluster version validation</div>
+        <div class="grid2"><div class="card"><h3>Artifact invariants</h3><ul><li>Standard images never include the libvirt-only QEMU guest agent.</li><li>Unraid always selects the <b>-libvirt</b> image.</li><li>OCI always selects the standard image and OCI artifact.</li><li>Image tags and generated file content are produced by the build workflow; the ledger records the resulting schematic and OCI image identifiers.</li></ul></div><div class="card"><h3>Automation invariants</h3><ul><li>`versions.yaml` is the only human release input.</li><li>Unraid automation is not yet present; the current hand-off is an explicit CLI version.</li><li>Branches and PRs are idempotent per release request.</li><li>The build workflow creates or updates the GitOps PR; it does not update <code>omni-on-unraid</code>.</li></ul></div></div>
+        <div class="explain"><b>Plain explanation.</b> The rules keep the two consumers from receiving the wrong image. OCI uses the standard installer and OCI artifact. Unraid uses the libvirt installer and provider setting. The checker compares the files that matter, so a version mismatch fails as a visible error instead of becoming a partial update.</div>
+        <div class="note"><b>One-line mental model:</b> the Argo repository owns the desired version; the image repository owns artifact production; each platform repository owns its projection of the same artifact set.</div>
+      </section>
+    </main>
+  </div>
+  <p class="footer">Talos release coordinator • canonical source: syscode-homelab-gitops-apps/omni/versions.yaml • design artifact</p>
+</div>
+<script>
+  async function capture() { const el=document.getElementById('report-container'); const r=el.getBoundingClientRect(); const p=32; return html2canvas(document.body,{backgroundColor:'#020617',scale:2,useCORS:true,ignoreElements:e=>e.classList&&e.classList.contains('toolbar'),x:r.left+scrollX-p,y:r.top+scrollY-p,width:r.width+p*2,height:r.height+p*2}); }
+  async function copyAsImage(btn) { const old=btn.textContent; try { const c=await capture(); const b=await new Promise(r=>c.toBlob(r,'image/png')); await navigator.clipboard.write([new ClipboardItem({'image/png':b})]); btn.textContent='✓ Copied'; } catch(e) { btn.textContent='✗ Failed'; } setTimeout(()=>btn.textContent=old,1800); }
+  async function downloadPNG(btn) { const old=btn.textContent; try { const c=await capture(); const a=document.createElement('a'); a.download='talos-release-coordinator-design.png'; a.href=c.toDataURL('image/png'); a.click(); btn.textContent='✓ Done'; } catch(e) { btn.textContent='✗ Failed'; } setTimeout(()=>btn.textContent=old,1800); }
+  async function downloadPDF(btn) { const old=btn.textContent; try { const c=await capture(); const {jsPDF}=window.jspdf; const pdf=new jsPDF({orientation:'landscape',unit:'px',format:[c.width,c.height],hotfixes:['px_scaling']}); pdf.addImage(c.toDataURL('image/png'),'PNG',0,0,c.width,c.height); pdf.save('talos-release-coordinator-design.pdf'); btn.textContent='✓ Done'; } catch(e) { btn.textContent='✗ Failed'; } setTimeout(()=>btn.textContent=old,1800); }
+  async function copyCode(btn) { const text=btn.parentElement.querySelector('pre').innerText; const old=btn.textContent; try { await navigator.clipboard.writeText(text); btn.textContent='copied'; } catch(e) { btn.textContent='failed'; } setTimeout(()=>btn.textContent=old,1400); }
+</script>
+</body>
+</html>
