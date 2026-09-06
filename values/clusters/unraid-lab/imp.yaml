@@ -1,16 +1,16 @@
 operator:
   image:
-    repository: ghcr.io/syscode-labs/imp-operator@sha256:b413f0483842dee34437ccae96642a9a4197928734b062b333ad993080890cbb
+    repository: ghcr.io/syscode-labs/imp-operator@sha256:e3479d962df779160547845e1f3f715e9b366acbba7cae087ff232029cb0f343
 
 agent:
   image:
-    repository: ghcr.io/syscode-labs/imp-agent@sha256:c9bfe0fb3ff508de0ec85e4cf0beefb35c058840447c91e2062229446e758205
+    repository: ghcr.io/syscode-labs/imp-agent@sha256:99e8675e1247b8de3c36405d3b3e4ab0fc0d9446c2bff92b959b04e5533a073a
   env:
     kernelPath: /usr/local/share/imp/vmlinux
 
 runtime:
   image:
-    repository: ghcr.io/syscode-labs/imp-agent@sha256:c9bfe0fb3ff508de0ec85e4cf0beefb35c058840447c91e2062229446e758205
+    repository: ghcr.io/syscode-labs/imp-agent@sha256:99e8675e1247b8de3c36405d3b3e4ab0fc0d9446c2bff92b959b04e5533a073a
 
 kvm:
   preflight:

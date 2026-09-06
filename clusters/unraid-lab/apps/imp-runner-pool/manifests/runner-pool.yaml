@@ -1,0 +1,54 @@
+apiVersion: imp.dev/v1alpha1
+kind: ImpVMClass
+metadata:
+  name: github-runner
+spec:
+  vcpu: 2
+  memoryMiB: 2048
+  diskGiB: 12
+  arch: amd64
+---
+apiVersion: imp.dev/v1alpha1
+kind: ImpNetwork
+metadata:
+  name: github-runner
+  namespace: imp-system
+spec:
+  subnet: 192.168.230.0/24
+  nat:
+    enabled: true
+---
+apiVersion: imp.dev/v1alpha1
+kind: ImpVMTemplate
+metadata:
+  name: github-runner
+  namespace: imp-system
+spec:
+  classRef:
+    name: github-runner
+  image: ghcr.io/syscode-labs/imp-runner-base@sha256:2eff35dfb047cdca1c396825a87cf5abbaa09a0115f539104fc256696c05fea8
+  networkRef:
+    name: github-runner
+---
+apiVersion: imp.dev/v1alpha1
+kind: ImpVMRunnerPool
+metadata:
+  name: github-runner
+  namespace: imp-system
+spec:
+  templateName: github-runner
+  runnerLayer: ghcr.io/syscode-labs/imp-runner-layer@sha256:52a77af159a2924a4c1f8e23ece993d61ce68fc05e9951134ec3177abfa77059
+  platform:
+    type: github-actions
+    tokenSource: github_app
+    scope:
+      org: syscode-labs
+    credentialsSecret: github-imp-runners
+  scaling:
+    mode: polling
+    minIdle: 0
+    maxConcurrent: 5
+    scaleUpStep: 1
+    cooldownSeconds: 30
+    polling:
+      intervalSeconds: 30
