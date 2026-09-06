@@ -34206,6 +34206,10 @@ cluster:
         metadata:
           name: apps
           namespace: argocd
+          annotations:
+            # Kubernetes 1.36 exposes Deployment status fields that older ArgoCD
+            # schemas do not understand. Use Kubernetes server-side diffing.
+            argocd.argoproj.io/compare-options: ServerSideDiff=true
         spec:
           goTemplate: true
           goTemplateOptions: ["missingkey=error"]
@@ -34349,8 +34353,13 @@ cluster:
               - CreateNamespace=true
     - name: argocd-unraid-manager
       contents: |
-        # OCI-hosted Argo CD authenticates through Omni's Kubernetes proxy with
-        # this dedicated group after the control-plane handover.
+        # Local Argo self-registration uses a Kubernetes service-account token.
+        apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          name: argocd-manager
+          namespace: kube-system
+        ---
         apiVersion: rbac.authorization.k8s.io/v1
         kind: ClusterRole
         metadata:
@@ -34375,3 +34384,6 @@ cluster:
           - kind: Group
             name: argocd-unraid
             apiGroup: rbac.authorization.k8s.io
+          - kind: ServiceAccount
+            name: argocd-manager
+            namespace: kube-system
