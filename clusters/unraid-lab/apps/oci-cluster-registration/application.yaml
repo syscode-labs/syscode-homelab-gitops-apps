@@ -9,6 +9,7 @@ metadata:
   labels:
     syscode.io/cluster: unraid-lab
   annotations:
+    # Raw-lane sync creates this after the local External Secrets Application.
     argocd.argoproj.io/sync-wave: "-1"
 spec:
   project: default
@@ -23,3 +24,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - SkipDryRunOnMissingResource=true

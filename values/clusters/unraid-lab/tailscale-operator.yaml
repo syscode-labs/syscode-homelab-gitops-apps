@@ -1,6 +1,3 @@
 # Unraid Talos cluster identity.
 proxyConfig:
-  defaultTags:
-    - tag:k8s-operator
-    - tag:talos
-    - tag:unraid-lab-talos
+  defaultTags: "tag:k8s-operator tag:talos tag:unraid-lab-talos"

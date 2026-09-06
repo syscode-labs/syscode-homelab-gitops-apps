@@ -13,7 +13,7 @@ metadata:
   labels:
     syscode.io/cluster: unraid-lab
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-2"
     # Argo's structured-merge diff cannot decode Kubernetes 1.36 Deployment
     # status. Use the supported server-side dry-run diff for this application.
     argocd.argoproj.io/compare-options: ServerSideDiff=true
@@ -34,7 +34,9 @@ spec:
       targetRevision: HEAD
       path: clusters/unraid-lab/apps/external-secrets/manifests
   destination:
-    name: unraid-lab
+    # This ArgoCD instance runs inside unraid-lab. Install ESO locally first;
+    # the cluster-registration Application depends on its CRDs and controller.
+    server: https://kubernetes.default.svc
     namespace: external-secrets
   syncPolicy:
     automated:

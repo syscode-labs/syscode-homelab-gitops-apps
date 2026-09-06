@@ -81,6 +81,10 @@ spec:
       name: '{{ .clusterName }}-{{ .path.basename }}'
       labels:
         syscode.io/cluster: '{{ .clusterName }}'
+      annotations:
+        # Kubernetes 1.36 exposes Deployment status fields that older ArgoCD
+        # schemas do not understand. Use Kubernetes server-side diffing.
+        argocd.argoproj.io/compare-options: ServerSideDiff=true
     spec:
       project: default
       sources:
