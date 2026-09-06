@@ -32,7 +32,7 @@ case "$CLUSTER" in
   unraid-lab)
     FILE="clusters/unraid-lab/omni/inline-manifests.yaml"
     WITH_ARGOCD=1
-    WITH_CILIUM=0
+    WITH_CILIUM=1
     ARGOCD_VERSION="${ARGOCD_VERSION:-v3.5.2}"
     ;;
   *)
