@@ -24,7 +24,9 @@ spec:
       targetRevision: HEAD
       ref: values
   destination:
-    name: unraid-lab
+    # In-cluster endpoint: deploy directly to the cluster Argo runs on instead
+    # of the Omni-registered cluster name, whose API proxy caused sync failures.
+    server: https://kubernetes.default.svc
     namespace: imp-system
   syncPolicy:
     automated:
