@@ -55,6 +55,21 @@ data:
   resource.customizations.ignoreDifferences.apps_Deployment: |
     jsonPointers:
       - /status/terminatingReplicas
+  # Tailscale publishes the external address outside Kubernetes. Its Ingress
+  # status therefore remains empty even when the endpoint is working.
+  resource.customizations.health.networking.k8s.io_Ingress: |
+    hs = {}
+    if obj.spec.ingressClassName == "tailscale" then
+      hs.status = "Healthy"
+      hs.message = "Tailscale owns the external endpoint"
+    elseif obj.status and obj.status.loadBalancer and obj.status.loadBalancer.ingress and #obj.status.loadBalancer.ingress > 0 then
+      hs.status = "Healthy"
+      hs.message = "Ingress has an external address"
+    else
+      hs.status = "Progressing"
+      hs.message = "Waiting for an external address"
+    end
+    return hs
   resource.exclusions: |
     # Keep Argo CD 3's default high-churn exclusions while preserving the
     # pre-existing CiliumIdentity exclusion.
