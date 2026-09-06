@@ -18,7 +18,7 @@ case "$CLUSTER" in
     ;;
   unraid-lab)
     MANIFESTS="$REPO_ROOT/clusters/$CLUSTER/omni/inline-manifests.yaml"
-    PATCH_ID="202-cluster-unraid-lab-omni/patches/inline-manifests.yaml"
+    PATCH_ID="200-cluster-unraid-lab-omni/patches/inline-manifests.yaml"
     ARGOCD_CONFIG="$REPO_ROOT/bootstrap/argocd-cm.yaml"
     ;;
 esac
@@ -35,6 +35,41 @@ esac
 temporary="$(mktemp -d)"
 trap 'rm -rf "$temporary"' EXIT
 
+EFFECTIVE_MANIFESTS="$temporary/inline-manifests.yaml"
+cp "$MANIFESTS" "$EFFECTIVE_MANIFESTS"
+
+if [[ "$CLUSTER" == "unraid-lab" ]]; then
+  HOMELAB_SECRETS_ROOT="${HOMELAB_SECRETS_ROOT:-$REPO_ROOT/../homelab-secrets}"
+  BWS_TOKEN_FILE="$HOMELAB_SECRETS_ROOT/unraid-lab/bws-token.enc.yaml"
+  [[ -f "$BWS_TOKEN_FILE" ]] || {
+    printf 'missing encrypted bootstrap secret: %s\n' "$BWS_TOKEN_FILE" >&2
+    exit 1
+  }
+  command -v sops >/dev/null || {
+    printf 'sops is required to decrypt the unraid-lab bootstrap secret\n' >&2
+    exit 1
+  }
+  sops -d "$BWS_TOKEN_FILE" >"$temporary/bws-token.yaml"
+  python3 - "$temporary/bws-token.yaml" <<'PY'
+import sys
+
+import yaml
+
+secret = yaml.safe_load(open(sys.argv[1]))
+if (
+    secret.get("apiVersion") != "v1"
+    or secret.get("kind") != "Secret"
+    or secret.get("metadata", {}).get("name") != "bws-token"
+    or secret.get("metadata", {}).get("namespace") != "external-secrets"
+    or "token" not in secret.get("stringData", {}) | secret.get("data", {})
+):
+    raise SystemExit("unexpected bws-token bootstrap Secret shape")
+PY
+  BWS_TOKEN="$temporary/bws-token.yaml" yq -i \
+    '.cluster.inlineManifests += [{"name":"bootstrap-bws-token","contents": loadstr(strenv(BWS_TOKEN))}] |
+     (.cluster.inlineManifests[-1].contents) style="literal"' "$EFFECTIVE_MANIFESTS"
+fi
+
 cat >"$temporary/configpatch.yaml" <<YAML
 metadata:
   namespace: default
@@ -46,10 +81,10 @@ spec:
   data: ""
 YAML
 
-P="$MANIFESTS" yq -i \
+P="$EFFECTIVE_MANIFESTS" yq -i \
   '.spec.data = loadstr(strenv(P)) | .spec.data style="literal"' "$temporary/configpatch.yaml"
 
-python3 - "$MANIFESTS" <<'PY'
+python3 - "$EFFECTIVE_MANIFESTS" <<'PY'
 import sys
 
 import yaml
@@ -60,7 +95,7 @@ for inline_manifest in inline_manifests:
 print("inline manifests: valid")
 PY
 
-python3 - "$MANIFESTS" "$temporary/argocd.yaml" <<'PY'
+python3 - "$EFFECTIVE_MANIFESTS" "$temporary/argocd.yaml" <<'PY'
 import sys
 from pathlib import Path
 

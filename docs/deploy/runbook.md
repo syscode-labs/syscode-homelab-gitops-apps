@@ -118,23 +118,33 @@ Detail: `syscode-ai-internal-plans/projects/image-factory-registry/handoffs/2026
 
 ## Secrets bootstrap (unraid-lab, ESO + Bitwarden)
 
-DR order for the secrets pipeline: Argo installs ESO + `bitwarden-sdk-server`
-(app `external-secrets`); cert-manager issues the sdk-server serving cert.
-The single provider token is SOPS-encrypted in the private repo
-`syscod3/homelab-secrets` at `unraid-lab/bws-token.enc.yaml`. Restore it once
-with:
+The provider token is secret zero. It must exist before External Secrets can
+read any other Bitwarden value. The automatic path is
+`omni/scripts/apply-inline-manifests.sh unraid-lab --apply`: it decrypts the
+SOPS file from the sibling private `homelab-secrets` checkout, validates that it
+is the expected `external-secrets/bws-token` Secret, and adds it to the same
+Omni inline-manifest ConfigPatch as the Argo bootstrap. The decrypted value is
+written only to a temporary file and the ConfigPatch is stored by Omni.
+
+The default private-repository location is `../homelab-secrets` relative to
+this repository. Override it with `HOMELAB_SECRETS_ROOT` when the checkouts are
+elsewhere. The encrypted source remains:
+`homelab-secrets/unraid-lab/bws-token.enc.yaml`.
+
+After the cluster starts, Argo installs ESO and the Bitwarden SDK server. ESO
+then uses `bws-token` to create the remaining secrets, including the Argo
+cluster-registration Secret and Tailscale OAuth Secret. Re-running the command
+is safe because the ConfigPatch and Kubernetes Secret are applied
+idempotently.
+
+For recovery or verification only, the equivalent manual command is:
 
 ```sh
 sops -d /path/to/homelab-secrets/unraid-lab/bws-token.enc.yaml | \
-  kubectl --context omni-unraid-lab apply -f -
+  kubectl --context omni-unraid-lab -n external-secrets apply -f -
 ```
 
-Everything else (grafana-cloud, argocd-pocketid-oidc, and
-tailscale/operator-oauth) then syncs via ExternalSecrets against
-ClusterSecretStore `bitwarden`. The Tailscale Bitwarden value has the client
-ID on line one and client secret on line two; ESO templates those into the
-keys the operator requires. Never create per-namespace provider tokens; never
-paste the token into any agent session.
+Never commit the decrypted file or paste the token into a terminal transcript.
 
 ## Secrets bootstrap (oci-lab, ESO + Bitwarden)
 
