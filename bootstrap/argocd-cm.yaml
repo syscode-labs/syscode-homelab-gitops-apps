@@ -50,6 +50,11 @@ data:
   # tracking during this upgrade so existing resources are not orphaned.
   application.resourceTrackingMethod: label
   resource.customLabels: syscode.io/cluster
+  # Kubernetes 1.36 adds this Deployment status field. Older Argo schemas
+  # reject it during structured diff even though it is harmless status data.
+  resource.customizations.ignoreDifferences.apps_Deployment: |
+    jsonPointers:
+      - /status/terminatingReplicas
   resource.exclusions: |
     # Keep Argo CD 3's default high-churn exclusions while preserving the
     # pre-existing CiliumIdentity exclusion.
