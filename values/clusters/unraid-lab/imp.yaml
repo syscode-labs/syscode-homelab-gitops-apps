@@ -1,6 +1,6 @@
 operator:
   image:
-    repository: ghcr.io/syscode-labs/imp-operator@sha256:146bc89085f8a276c9a089e7656063a570c093f4d3172be59d86769ba33045d9
+    repository: ghcr.io/syscode-labs/imp-operator@sha256:585dfe70f06743be77c84a2458301db47e43998668733f21b5f270a536d751d9
 
 agent:
   image:
