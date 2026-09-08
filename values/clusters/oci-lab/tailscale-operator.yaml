@@ -1,5 +1,6 @@
-# The OCI OAuth client is authorized for the operator-owned tag only.  ProxyGroup
-# creation rejects the former talos/cluster tags, which prevents the egress proxy
-# backing OCI Argo's remote Unraid API registration from being provisioned.
-proxyConfig:
+# The operator retains its owner identity; OCI Argo egress proxies use their
+# dedicated, least-privilege identity.
+operatorConfig:
   defaultTags: "tag:k8s-operator"
+proxyConfig:
+  defaultTags: "tag:oci-argo-egress"
