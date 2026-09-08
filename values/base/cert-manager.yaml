@@ -1,2 +1,31 @@
 crds:
   enabled: true
+
+# Unraid-lab runs all nodes with NoSchedule taints: three control-plane nodes,
+# plus the runner node taint on the first control-plane. Cert-manager must be
+# schedulable on the cluster's only available nodes.
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+  - key: imp.dev/runner
+    operator: Exists
+    effect: NoSchedule
+
+webhook:
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+    - key: imp.dev/runner
+      operator: Exists
+      effect: NoSchedule
+
+cainjector:
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+    - key: imp.dev/runner
+      operator: Exists
+      effect: NoSchedule
