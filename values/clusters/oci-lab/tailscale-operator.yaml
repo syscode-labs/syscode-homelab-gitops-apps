@@ -1,3 +1,5 @@
-# OCI Talos cluster identity.
+# The OCI OAuth client is authorized for the operator-owned tag only.  ProxyGroup
+# creation rejects the former talos/cluster tags, which prevents the egress proxy
+# backing OCI Argo's remote Unraid API registration from being provisioned.
 proxyConfig:
-  defaultTags: "tag:k8s-operator tag:talos tag:oci-lab-talos"
+  defaultTags: "tag:k8s-operator"
