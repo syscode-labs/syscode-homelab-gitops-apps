@@ -50,22 +50,12 @@ workdir="$(mktemp -d)"
 trap 'rm -rf "$workdir"; unset BWS_TOKEN' EXIT
 BWS_TOKEN="$(<"$HOME/.bws_token")"
 
-# The file is mode 0600 and deleted on exit. It never enters Git or stdout.
-cat >"$workdir/secret.yaml" <<EOF
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: ${NAMESPACE}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ${SECRET}
-  namespace: ${NAMESPACE}
-type: Opaque
-stringData:
-  token: "${BWS_TOKEN}"
-EOF
+# Build the manifest with kubectl rather than interpolating the token into YAML:
+# this preserves every token byte and keeps it out of Git and stdout.
+printf '%s' "$BWS_TOKEN" >"$workdir/token"
+chmod 600 "$workdir/token"
+kubectl -n "$NAMESPACE" create secret generic "$SECRET" \
+  --from-file="token=$workdir/token" --dry-run=client -o yaml >"$workdir/secret.yaml"
 chmod 600 "$workdir/secret.yaml"
 
 python3 - "$workdir/secret.yaml" "$workdir/configpatch.yaml" "$CLUSTER" <<'PY'
@@ -102,8 +92,12 @@ chmod 600 "$workdir/configpatch.yaml"
 
 # Do not use a manifest in repository state. The token remains only in process
 # memory, the short-lived 0600 file, the authorized live Secret, and Omni.
-KUBECONFIG="$workdir/kubeconfig" kubectl apply --server-side \
-  --field-manager=oci-secret-zero-bootstrap -f "$workdir/secret.yaml" >/dev/null
+# Recreate from the token file through a pipe for the live repair; no token-bearing
+# manifest is printed or retained outside the private temporary directory.
+kubectl -n "$NAMESPACE" create secret generic "$SECRET" \
+  --from-file="token=$workdir/token" --dry-run=client -o yaml | \
+  KUBECONFIG="$workdir/kubeconfig" kubectl apply --server-side \
+    --field-manager=oci-secret-zero-bootstrap -f - >/dev/null
 
 KUBECONFIG="$workdir/kubeconfig" kubectl wait --for=condition=Ready \
   "clustersecretstore/${STORE}" --timeout=5m >/dev/null
