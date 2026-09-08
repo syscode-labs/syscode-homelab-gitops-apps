@@ -14,22 +14,20 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/syscode-labs/imp.git
-      targetRevision: b86ab24ff584d5116376e6b890f40da081922a59
+      targetRevision: c4fc6ce8ffe875e6eb88f0c5fe410f9721de0d42
       path: charts/imp
       helm:
         releaseName: imp
         valueFiles:
           - $values/values/clusters/unraid-lab/imp.yaml
     - repoURL: https://github.com/syscode-labs/imp.git
-      targetRevision: b86ab24ff584d5116376e6b890f40da081922a59
+      targetRevision: c4fc6ce8ffe875e6eb88f0c5fe410f9721de0d42
       path: config/crd/bases
     - repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
       targetRevision: HEAD
       ref: values
   destination:
-    # In-cluster endpoint: deploy directly to the cluster Argo runs on instead
-    # of the Omni-registered cluster name, whose API proxy caused sync failures.
-    server: https://kubernetes.default.svc
+    name: unraid-lab
     namespace: imp-system
   syncPolicy:
     automated:

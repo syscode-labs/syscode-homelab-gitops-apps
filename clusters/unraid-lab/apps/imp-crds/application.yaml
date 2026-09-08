@@ -11,10 +11,10 @@ spec:
   project: default
   source:
     repoURL: https://github.com/syscode-labs/imp.git
-    targetRevision: b86ab24ff584d5116376e6b890f40da081922a59
+    targetRevision: c4fc6ce8ffe875e6eb88f0c5fe410f9721de0d42
     path: config/crd/bases
   destination:
-    server: https://kubernetes.default.svc
+    name: unraid-lab
     namespace: imp-system
   syncPolicy:
     automated:

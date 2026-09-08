@@ -47,8 +47,8 @@ spec:
     credentialsSecret: github-imp-runners
   scaling:
     mode: polling
-    minIdle: 1
-    maxConcurrent: 5
+    minIdle: 0
+    maxConcurrent: 1
     scaleUpStep: 1
     cooldownSeconds: 30
     polling:
