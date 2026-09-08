@@ -14,7 +14,7 @@ spec:
     targetRevision: HEAD
     path: clusters/unraid-lab/apps/imp-namespace/manifests
   destination:
-    server: https://kubernetes.default.svc
+    name: unraid-lab
     namespace: imp-system
   syncPolicy:
     automated:

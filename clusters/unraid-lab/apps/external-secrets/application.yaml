@@ -34,9 +34,7 @@ spec:
       targetRevision: HEAD
       path: clusters/unraid-lab/apps/external-secrets/manifests
   destination:
-    # This ArgoCD instance runs inside unraid-lab. Install ESO locally first;
-    # the cluster-registration Application depends on its CRDs and controller.
-    server: https://kubernetes.default.svc
+    name: unraid-lab
     namespace: external-secrets
   syncPolicy:
     automated:
