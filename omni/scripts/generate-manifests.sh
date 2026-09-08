@@ -1,19 +1,13 @@
 #!/usr/bin/env bash
-# Fill the generated blocks of a cluster's Talos inline-manifests:
-#   oci-lab      argocd       raw Argo CD install manifest (upstream install.yaml)
-#                argocd-apps  appset.yaml — the layering ApplicationSet, embedded
-#                             verbatim and reconciling both clusters
-#                cilium       rendered Cilium for the kube-proxy-free cluster
-#
-# The static blocks (oci-lab's argocd-manager RBAC, unraid's argocd-bootstrap /
-# argocd-unraid-raw) and every comment are left untouched — yq edits only the
-# named blocks in place.
+# Fill generated Talos inline-manifest blocks. OCI owns the sole Argo CD control
+# plane (`argocd`, `argocd-apps`) and reconciles both clusters; both clusters
+# retain only their rendered Cilium bootstrap block.
 #
 # Usage:  omni/scripts/generate-manifests.sh <oci-lab|unraid-lab>
 #   or:   mise run oci-lab:generate-manifests   /   mise run unraid:generate-manifests
 #
-# Requirements: yq (mikefarah v4), curl, helm, kubectl. Run after Cilium/Argo CD
-# version bumps or appset.yaml changes, then review + commit the result.
+# Requirements: yq (mikefarah v4), curl, helm, kubectl. Run after Cilium changes
+# (or OCI Argo CD/appset changes), then review + commit the result.
 set -euo pipefail
 
 CLUSTER="${1:?usage: generate-manifests.sh <oci-lab|unraid-lab>}"
@@ -31,9 +25,9 @@ case "$CLUSTER" in
     ;;
   unraid-lab)
     FILE="clusters/unraid-lab/omni/inline-manifests.yaml"
-    WITH_ARGOCD=1
+    # OCI is the only Argo control plane; never regenerate a local one.
+    WITH_ARGOCD=0
     WITH_CILIUM=1
-    ARGOCD_VERSION="${ARGOCD_VERSION:-v3.5.2}"
     ;;
   *)
     echo "unknown cluster '$CLUSTER' (expected oci-lab or unraid-lab)" >&2
