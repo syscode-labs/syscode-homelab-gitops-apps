@@ -7,6 +7,9 @@ agent:
     repository: ghcr.io/syscode-labs/imp-agent@sha256:cb8e69a54ae23a735d5cda8ff85b1cdc53d99014dca6e2ffe67235e4ca9d01b4
   env:
     kernelPath: /usr/local/share/imp/vmlinux
+  nodeSelector:
+    imp/enabled: null
+    imp.dev/runner: "true"
   tolerations:
     - key: imp.dev/runner
       operator: Equal
@@ -16,6 +19,9 @@ agent:
 runtime:
   image:
     repository: ghcr.io/syscode-labs/imp-agent@sha256:326ed2e5fea1a579696d8a135e0e054822c26b9c38585f63cb442fb83d8d2cb8
+  nodeSelector:
+    imp/enabled: null
+    imp.dev/runner: "true"
   tolerations:
     - key: imp.dev/runner
       operator: Equal
@@ -26,6 +32,9 @@ kvm:
   preflight:
     enabled: true
     minVerifiedNodes: 1
+    nodeSelector:
+      imp/enabled: null
+      imp.dev/runner: "true"
     tolerations:
       - key: imp.dev/runner
         operator: Equal
