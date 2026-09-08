@@ -24,7 +24,16 @@ fi
   printf 'missing readable BWS token file: %s/.bws_token\n' "$HOME" >&2
   exit 1
 }
-command -v omnictl >/dev/null
+# Allow an explicit pinned CLI for an Omni backend upgrade. Prefer the matching
+# local 1.11 client when it is installed; the PATH shim can lag the backend.
+if [[ -n "${OMNICTL_BIN:-}" ]]; then
+  OMNICTL="$OMNICTL_BIN"
+elif [[ -x "$HOME/.local/share/mise/installs/omnictl/1.11.0/omnictl" ]]; then
+  OMNICTL="$HOME/.local/share/mise/installs/omnictl/1.11.0/omnictl"
+else
+  OMNICTL="$(command -v omnictl)"
+fi
+[[ -x "$OMNICTL" ]] || { printf 'omnictl executable is unavailable: %s\n' "$OMNICTL" >&2; exit 1; }
 command -v kubectl >/dev/null
 command -v bws >/dev/null
 
@@ -88,8 +97,8 @@ configpatch_path.write_text(yaml.safe_dump(configpatch, sort_keys=False))
 PY
 chmod 600 "$workdir/configpatch.yaml"
 
-omnictl apply -f "$workdir/configpatch.yaml" >/dev/null
-omnictl kubeconfig "$workdir/kubeconfig" --cluster "$CLUSTER" --merge=false --force >/dev/null
+"$OMNICTL" apply -f "$workdir/configpatch.yaml" >/dev/null
+"$OMNICTL" kubeconfig "$workdir/kubeconfig" --cluster "$CLUSTER" --merge=false --force >/dev/null
 
 # Do not use a manifest in repository state. The token remains only in process
 # memory, the short-lived 0600 file, the authorized live Secret, and Omni.
