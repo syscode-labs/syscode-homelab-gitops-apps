@@ -1,0 +1,10 @@
+# Cloud (OCI) cluster: small nodes (~950m CPU / 5.4GB allocatable).
+# Cap metrics-server so it can never starve the workloads it serves.
+# (kubelet TLS args stay from values/base/metrics-server.yaml.)
+resources:
+  requests:
+    cpu: 50m
+    memory: 100Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
