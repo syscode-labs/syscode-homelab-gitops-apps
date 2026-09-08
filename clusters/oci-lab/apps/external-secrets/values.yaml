@@ -1,5 +1,10 @@
 bitwarden-sdk-server:
   enabled: true
+  # v0.7.0 updates the Bitwarden SDK implementation; v0.6.0 consistently
+  # received HTTP 400 from Bitwarden Identity despite a byte-identical valid
+  # machine-account token.
+  image:
+    tag: v0.7.0
 
 serviceMonitor:
   enabled: false
