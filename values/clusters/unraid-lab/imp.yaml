@@ -1,6 +1,11 @@
 operator:
   image:
     repository: ghcr.io/syscode-labs/imp-operator@sha256:6200bf562d99baf4307c2997a14fb3b2b7e8795f23372ebcef4b0e60711ed5e6
+  tolerations:
+    - key: imp.dev/runner
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
 
 agent:
   image:
