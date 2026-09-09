@@ -12,7 +12,7 @@ operator:
 
 agent:
   image:
-    repository: ghcr.io/syscode-labs/imp-agent@sha256:21443c17cf312c1f370c68c5480ea0b97f827c4739f3163b25c161e20f3f4bff
+    repository: ghcr.io/syscode-labs/imp-agent@sha256:6fb0860b1b5994d392387ebafe2274c8b3eecd55bfc4fd056ba87a1dcd2fc82a
   env:
     kernelPath: /usr/local/share/imp/vmlinux
   nodeSelector:
@@ -26,7 +26,7 @@ agent:
 
 runtime:
   image:
-    repository: ghcr.io/syscode-labs/imp-agent@sha256:21443c17cf312c1f370c68c5480ea0b97f827c4739f3163b25c161e20f3f4bff
+    repository: ghcr.io/syscode-labs/imp-agent@sha256:6fb0860b1b5994d392387ebafe2274c8b3eecd55bfc4fd056ba87a1dcd2fc82a
   nodeSelector:
     imp/enabled: null
     imp.dev/runner: "true"
