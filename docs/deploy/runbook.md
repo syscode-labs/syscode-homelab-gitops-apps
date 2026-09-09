@@ -82,6 +82,16 @@ After the oci-lab cluster is up and reachable over the private path
 
 Never commit the token or CA; they travel only through Bitwarden.
 
+## Argo transport ownership invariant
+
+For the remote OCI reconciliation path, the GitOps-owned `argocd/omni-kubernetes-proxy`
+Service and its `ProxyGroup` egress manifest are a single transport unit. Keep
+that owning egress manifest applied until Argo has a separately deployed,
+verified replacement path; removing it first breaks Argo's DNS/reachability
+path. Recovery order is: restore/reconcile the owner, verify proxy resolution
+and the registered OCI cluster, then verify Application sync. Do not delete the
+manifest as cleanup while OCI Applications still depend on this transport.
+
 ## 5. Pre-merge gate
 
 Do not merge #17 until both pass:
