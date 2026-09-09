@@ -21,7 +21,8 @@ metadata:
 spec:
   subnet: 192.168.230.0/24
   dns:
-    - 192.168.230.1
+    - 1.1.1.1
+    - 8.8.8.8
   nat:
     enabled: true
 ---
