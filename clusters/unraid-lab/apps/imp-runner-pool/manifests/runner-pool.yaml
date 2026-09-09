@@ -7,6 +7,11 @@ spec:
   memoryMiB: 2048
   diskGiB: 12
   arch: amd64
+  tolerations:
+    - key: imp.dev/runner
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
 ---
 apiVersion: imp.dev/v1alpha1
 kind: ImpNetwork
