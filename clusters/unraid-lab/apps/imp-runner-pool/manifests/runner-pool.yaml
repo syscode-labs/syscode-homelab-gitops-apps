@@ -45,7 +45,7 @@ metadata:
   namespace: imp-system
 spec:
   templateName: github-runner
-  runnerLayer: ghcr.io/syscode-labs/imp-runner-layer@sha256:e216bf2143fec0d0898593437f1511ff46a165221a16b98dc580accfe65b60cd
+  runnerLayer: ghcr.io/syscode-labs/imp-runner-layer@sha256:c8e0ffd4e719d0eb2c09d585801a46e300d773bc204deea0cdc2d568761b6e0a
   platform:
     type: github-actions
     tokenSource: github_app
