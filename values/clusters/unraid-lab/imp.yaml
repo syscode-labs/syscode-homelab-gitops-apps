@@ -1,6 +1,6 @@
 operator:
   image:
-    repository: ghcr.io/syscode-labs/imp-operator@sha256:ebf2ca1e539327aac124f9ead36d1436eeec35778e5d38ba1b17d990c98b50bf
+    repository: ghcr.io/syscode-labs/imp-operator@sha256:d3f6ba8c376b971feb94de0d9e40a730b6b5c1c3917d62eac78d23fa74f95837
   tolerations:
     - key: imp.dev/runner
       operator: Equal
@@ -12,7 +12,7 @@ operator:
 
 agent:
   image:
-    repository: ghcr.io/syscode-labs/imp-agent@sha256:5e689f30b49ba66233682087ee9c1945d359979559225f9e58739e065083e543
+    repository: ghcr.io/syscode-labs/imp-agent@sha256:f9d31a9624f9ab561216f1498372bf235d588588418d4914b211b719ceeb3dcc
   env:
     kernelPath: /usr/local/share/imp/vmlinux
   nodeSelector:
@@ -26,7 +26,7 @@ agent:
 
 runtime:
   image:
-    repository: ghcr.io/syscode-labs/imp-agent@sha256:5e689f30b49ba66233682087ee9c1945d359979559225f9e58739e065083e543
+    repository: ghcr.io/syscode-labs/imp-agent@sha256:f9d31a9624f9ab561216f1498372bf235d588588418d4914b211b719ceeb3dcc
   nodeSelector:
     imp/enabled: null
     imp.dev/runner: "true"
