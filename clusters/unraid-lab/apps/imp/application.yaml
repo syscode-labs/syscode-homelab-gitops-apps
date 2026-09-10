@@ -14,14 +14,14 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/syscode-labs/imp.git
-      targetRevision: 959b4176f0af857dd65ed55eb9dea6daa9fc02b5
+      targetRevision: 0a377e6ce682218c7711e8e0c857c000796955ea
       path: charts/imp
       helm:
         releaseName: imp
         valueFiles:
           - $values/values/clusters/unraid-lab/imp.yaml
     - repoURL: https://github.com/syscode-labs/imp.git
-      targetRevision: 959b4176f0af857dd65ed55eb9dea6daa9fc02b5
+      targetRevision: 0a377e6ce682218c7711e8e0c857c000796955ea
       path: config/crd/bases
     - repoURL: https://github.com/syscode-labs/syscode-homelab-gitops-apps.git
       targetRevision: HEAD
