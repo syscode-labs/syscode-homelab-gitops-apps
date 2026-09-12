@@ -1,0 +1,5 @@
+# Grafana Operator manages Grafana Cloud resources declared in monitoring.
+chart: grafana-operator
+repoURL: https://grafana.github.io/helm-charts
+version: "5.24.0"
+namespace: grafana-operator

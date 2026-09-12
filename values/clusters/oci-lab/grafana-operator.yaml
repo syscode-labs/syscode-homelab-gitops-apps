@@ -1,0 +1,2 @@
+# Restrict reconciliation to Grafana resources in the monitoring namespace.
+watchNamespaces: monitoring
