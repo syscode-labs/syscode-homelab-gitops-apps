@@ -1,10 +1,6 @@
 cluster:
   name: oci-lab
 
-destinations:
-  grafana-cloud-metrics:
-    url: https://prometheus-prod-24-prod-eu-west-2.grafana.net/api/prom/push
-
 # The base values scrape Unraid's fixed control-plane addresses. OCI has one
 # different control plane and does not expose those endpoints through this path.
 collectors:
