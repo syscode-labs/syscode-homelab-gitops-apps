@@ -15,8 +15,7 @@ alloy-operator:
       operator: Exists
       effect: NoSchedule
 
-# The stateful metrics collector and singleton event collector also run as Pods,
-# so they require the same explicit scheduling permission.
+# All collectors and telemetry services run on the same tainted nodes.
 collectors:
   alloy-metrics:
     controller:
@@ -24,3 +23,6 @@ collectors:
   alloy-singleton:
     controller:
       tolerations: *control_plane_tolerations
+telemetryServices:
+  kube-state-metrics:
+    tolerations: *control_plane_tolerations
