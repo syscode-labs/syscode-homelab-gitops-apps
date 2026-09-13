@@ -1,0 +1,8 @@
+# Grafana Kubernetes Monitoring must be allowed to discover Imp's pod metrics.
+# The base profile remains limited to kube-system so OCI is unaffected.
+annotationAutodiscovery:
+  namespaces: [kube-system, imp-system]
+  pods:
+    enabled: true
+    labelSelectors:
+      app.kubernetes.io/name: imp
