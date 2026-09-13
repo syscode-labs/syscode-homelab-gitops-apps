@@ -1,0 +1,16 @@
+# Grafana Kubernetes Monitoring must be allowed to discover Imp's pod metrics.
+# The base profile remains limited to kube-system so OCI is unaffected.
+annotationAutodiscovery:
+  namespaces: [kube-system, imp-system]
+  pods:
+    enabled: true
+    labelSelectors:
+      app.kubernetes.io/name: imp
+
+# Every usable Unraid node is a tainted control-plane node. The Alloy Operator
+# must tolerate that taint before it can create the metrics collector.
+alloy-operator:
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
