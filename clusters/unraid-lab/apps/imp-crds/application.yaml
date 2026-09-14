@@ -11,7 +11,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/syscode-labs/imp.git
-    targetRevision: ffbf6bf27e297a700ae2c44f584d01f42b626df0
+    targetRevision: d12a8372e918182318fa5ef0e61804e21a6e82ae
     path: config/crd/bases
   destination:
     name: unraid-lab
