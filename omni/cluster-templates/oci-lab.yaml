@@ -15,11 +15,8 @@ talos:
 # upward and no `--allowed-dir` flag is needed. `status` now works without it.
 patches:
   - file: patches/cni-none.yaml
-  - file: patches/disable-kube-proxy.yaml
-  # allow-scheduling.yaml deliberately NOT applied: oci-lab's control plane
-  # stays dedicated (only the worker takes workloads).
-  # talos-1.14-compat.yaml contains SecurityProfileConfig, which Talos 1.13
-  # does not register. Add it only when versions.yaml moves oci-lab to 1.14.
+  # OCI keeps its control plane dedicated; the KubeProxyConfig patch is scoped
+  # to that role below because Talos 1.14 does not accept it on workers.
   - file: patches/oci-lab-inline-manifests.yaml
 ---
 # omnictl requires ControlPlane and Workers as SEPARATE documents. They were
@@ -28,6 +25,8 @@ patches:
 #   field workers not found in type models.Cluster
 # So this template was never syncable in that form.
 kind: ControlPlane
+patches:
+  - file: patches/disable-kube-proxy.yaml
 machineClass:
   name: oci-cp
   size: 1
