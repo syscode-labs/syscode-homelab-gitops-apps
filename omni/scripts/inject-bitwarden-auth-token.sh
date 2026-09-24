@@ -24,10 +24,12 @@ fi
   printf 'missing readable BWS token file: %s/.bws_token\n' "$HOME" >&2
   exit 1
 }
-# Allow an explicit pinned CLI for an Omni backend upgrade. Prefer the matching
-# local 1.11 client when it is installed; the PATH shim can lag the backend.
+# Use Hermes' service-account wrapper by default. It prevents a recovery hook
+# from falling back to browser-based Omni authentication.
 if [[ -n "${OMNICTL_BIN:-}" ]]; then
   OMNICTL="$OMNICTL_BIN"
+elif [[ -x "$HOME/.hermes/scripts/omnictl-sa" ]]; then
+  OMNICTL="$HOME/.hermes/scripts/omnictl-sa"
 elif [[ -x "$HOME/.local/share/mise/installs/omnictl/1.11.0/omnictl" ]]; then
   OMNICTL="$HOME/.local/share/mise/installs/omnictl/1.11.0/omnictl"
 else
