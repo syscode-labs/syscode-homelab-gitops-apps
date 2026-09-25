@@ -1,3 +1,9 @@
 # Unraid Talos cluster identity.
 proxyConfig:
   defaultTags: "tag:k8s-operator"
+
+operatorConfig:
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
