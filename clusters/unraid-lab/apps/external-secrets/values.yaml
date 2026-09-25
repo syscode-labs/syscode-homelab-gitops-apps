@@ -3,13 +3,6 @@
 # into the secret this subchart mounts by default.
 bitwarden-sdk-server:
   enabled: true
-  tolerations: &control_plane_toleration
-    - key: node-role.kubernetes.io/control-plane
-      operator: Exists
-      effect: NoSchedule
-
-global:
-  tolerations: *control_plane_toleration
 
 serviceMonitor:
   enabled: false # no Prometheus Operator CRDs on this cluster
