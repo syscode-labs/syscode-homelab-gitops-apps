@@ -1,0 +1,18 @@
+# Metrics Server may use general control-plane nodes, never the IMP runner.
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: imp.dev/runner
+              operator: DoesNotExist
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 200Mi
