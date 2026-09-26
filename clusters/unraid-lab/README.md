@@ -57,3 +57,51 @@ Harbor API) provisions:
 > v1.1 (cross-project): mint the robot credentials on demand from
 > [tessera](https://github.com/syscode-labs/tessera) (a Harbor create-then-delete
 > Source) instead of static robots.
+
+## Workload placement
+
+### The rule
+
+The Imp node is reserved for Imp. Only Imp workloads, DaemonSets, and a short
+approved list of low-demand workloads may run there. Other workloads must not
+tolerate `imp.dev/runner:NoSchedule`.
+
+Normal workloads are spread across the two general-purpose control-plane nodes.
+This is deliberate: putting every workload on every node would defeat the Imp
+reservation.
+
+### Capacity budget
+
+Use resource **requests** as the scheduler budget. Actual use is monitored
+separately.
+
+| Node class | CPU budget | Memory budget | Why |
+| --- | ---: | ---: | --- |
+| General-purpose control plane | 2.655 CPU (90%) | 85% of allocatable memory | Keep room for Talos and Kubernetes. |
+| Imp node | 1.95 CPU | 3.96 GiB | Reserve 1 CPU and 2.2 GiB for an on-demand ImpVM. |
+
+The Imp memory reservation is 110% of a 2 GiB VM: 2.2 GiB.
+
+### How this will be enforced
+
+1. Keep the existing Imp taint. Normal workloads do not tolerate it.
+2. Give ImpVMs a higher priority than the reserve workload.
+3. Place a preemptible reserve workload on the Imp node that requests 1 CPU and
+   2.2 GiB. The scheduler then keeps that space available until an ImpVM needs
+   it.
+4. Add topology-spread rules to eligible low-demand workloads so replicas prefer
+   different general-purpose nodes.
+5. Require CPU and memory requests for every workload managed for this cluster.
+
+This is a target policy, not a live guarantee yet. Do not change placement until
+all healthy members, live usage, requests, and the rendered workload rules have
+been checked.
+
+### Before any placement change
+
+- Confirm Omni's healthy-member count, not only Kubernetes `Ready`.
+- Confirm each eligible node has no memory, disk, or process pressure.
+- Check actual CPU and memory use plus requested capacity.
+- Render every changed workload.
+- Verify after reconciliation that no non-Imp workload has the Imp toleration or
+  lands on the Imp node.
