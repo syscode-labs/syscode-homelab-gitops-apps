@@ -3,6 +3,42 @@
 # into the secret this subchart mounts by default.
 bitwarden-sdk-server:
   enabled: true
+  tolerations: &control_plane_toleration
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  affinity: &non_imp_affinity
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: imp.dev/runner
+                operator: DoesNotExist
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+global:
+  tolerations: *control_plane_toleration
+  affinity: *non_imp_affinity
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+webhook:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+certController:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 serviceMonitor:
   enabled: false # no Prometheus Operator CRDs on this cluster

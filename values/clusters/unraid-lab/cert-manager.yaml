@@ -1,14 +1,42 @@
-# Keep cert-manager off the Imp runner. It may use a control-plane node.
+# Keep cert-manager on the two non-IMP control-plane nodes.
 tolerations: &control_plane_toleration
   - key: node-role.kubernetes.io/control-plane
     operator: Exists
     effect: NoSchedule
 
+affinity: &non_imp_affinity
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: imp.dev/runner
+              operator: DoesNotExist
+
+resources: &controller_resources
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
 webhook:
   tolerations: *control_plane_toleration
+  affinity: *non_imp_affinity
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 cainjector:
   tolerations: *control_plane_toleration
+  affinity: *non_imp_affinity
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 startupapicheck:
   tolerations: *control_plane_toleration
+  affinity: *non_imp_affinity
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
