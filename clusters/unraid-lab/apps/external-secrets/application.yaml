@@ -14,9 +14,9 @@ metadata:
     syscode.io/cluster: unraid-lab
   annotations:
     argocd.argoproj.io/sync-wave: "-2"
-    # Argo's structured-merge diff cannot decode Kubernetes 1.36 Deployment
-    # status. Use the supported server-side dry-run diff for this application.
-    argocd.argoproj.io/compare-options: ServerSideDiff=true
+    # ESO's validating webhook must become reachable before server-side dry-run
+    # comparison can succeed. Use legacy client-side diff for this Application only.
+    argocd.argoproj.io/compare-options: ServerSideDiff=false
 spec:
   project: default
   sources:
