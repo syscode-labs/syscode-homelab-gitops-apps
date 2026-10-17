@@ -60,13 +60,13 @@ core:
       imagePullPolicy: IfNotPresent
       env:
         - name: PGHOST
-          value: harbor-database
+          value: oci-lab-harbor-database
         - name: PGUSER
           value: postgres
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
-              name: harbor-database
+              name: oci-lab-harbor-database
               key: POSTGRES_PASSWORD
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
