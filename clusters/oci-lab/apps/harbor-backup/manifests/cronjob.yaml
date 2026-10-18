@@ -28,13 +28,13 @@ spec:
               image: postgres:16-alpine
               env:
                 - name: PGHOST
-                  value: harbor-database
+                  value: oci-lab-harbor-database
                 - name: PGUSER
                   value: postgres
                 - name: PGPASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: harbor-database
+                      name: oci-lab-harbor-database
                       key: POSTGRES_PASSWORD
               command: [sh, -ceu]
               args:
