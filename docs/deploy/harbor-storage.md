@@ -40,7 +40,7 @@ sync it before the following gates. No live storage or machine changes were
 performed in this PR.
 
 1. Review and merge fresh-initialization PR #127 first. Verify its restore init
-   container is absent from the effective database StatefulSet; do not restore
+   container is absent from the effective Harbor core Deployment; do not restore
    anything. Keep the backup CronJob and old suspended backup Job suspended.
 2. Review and merge this storage PR. Confirm the running Argo CD supports
    `syncPolicy.automated.enabled: false` and that the storage Application remains
