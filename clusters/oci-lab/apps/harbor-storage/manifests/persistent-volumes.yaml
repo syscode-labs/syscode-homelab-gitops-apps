@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: oci-lab-harbor-redis
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ''
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    namespace: harbor
+    name: data-oci-lab-harbor-redis-0
+    uid: 5dce0d11-96f3-48da-8d24-7876e526efc7
+  local:
+    path: /var/mnt/harbor-redis
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - ampere-vnic-1
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: oci-lab-harbor-database
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ''
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    namespace: harbor
+    name: database-data-oci-lab-harbor-database-0
+    uid: 2789d037-4bb8-4946-88e4-d9977e68354c
+  local:
+    path: /var/mnt/harbor-database
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - ampere-vnic-1
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: oci-lab-harbor-jobservice
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ''
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    namespace: harbor
+    name: oci-lab-harbor-jobservice
+    uid: d6158369-a237-4d72-b520-958d57811be2
+  local:
+    path: /var/mnt/harbor-jobservice
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - ampere-vnic-1
