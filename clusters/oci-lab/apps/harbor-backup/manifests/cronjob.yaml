@@ -4,6 +4,8 @@ metadata:
   name: harbor-postgres-backup
   namespace: harbor
 spec:
+  # Keep disabled until a native backup helper and verified backup exist.
+  suspend: true
   schedule: "17 3 * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
@@ -41,7 +43,7 @@ spec:
                 - |
                   until pg_isready -d registry; do sleep 2; done
                   pg_dump -Fc --no-owner --dbname=registry --file=/backup/harbor.dump
-                  sha256sum /backup/harbor.dump > /backup/latest.sha256
+                  (cd /backup && sha256sum harbor.dump > latest.sha256)
               volumeMounts:
                 - name: backup
                   mountPath: /backup
