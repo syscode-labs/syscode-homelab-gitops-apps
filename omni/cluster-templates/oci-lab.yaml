@@ -27,6 +27,8 @@ patches:
 kind: ControlPlane
 patches:
   - file: patches/disable-kube-proxy.yaml
+  # Directory-backed volumes use the existing EPHEMERAL filesystem; no new disks.
+  - file: patches/harbor-storage.yaml
 machineClass:
   name: oci-cp
   size: 1
