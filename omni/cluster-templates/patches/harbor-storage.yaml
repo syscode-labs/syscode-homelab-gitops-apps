@@ -1,0 +1,14 @@
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: harbor-redis
+volumeType: directory
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: harbor-database
+volumeType: directory
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: harbor-jobservice
+volumeType: directory
